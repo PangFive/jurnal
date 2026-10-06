@@ -370,6 +370,25 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;font-weight:500;z-index:30;max-width:calc(100% - 32px);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+/* family */
+.mrow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:11px 2px;border-top:1px solid var(--line)}
+.mav{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--primary),#C9B6FF);overflow:hidden;flex:none}
+.mav img{width:100%;height:100%;object-fit:cover}
+.mrow b{display:block;font-size:13.5px;font-weight:600;overflow-wrap:anywhere}
+.mrow small{color:var(--muted);font-size:11.5px;overflow-wrap:anywhere}
+.role{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.role.owner{background:var(--primary-soft);color:var(--primary)} .role.admin{background:#E2F6EE;color:var(--green)}
+.mrow .btn-s{background:var(--sunk);color:var(--ink)}
+.access{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.achip{display:inline-flex;align-items:center;gap:6px;background:var(--sunk);border-radius:999px;padding:3px 10px 3px 3px;font-size:12px;font-weight:600}
+.achip .mav{width:22px;height:22px;font-size:10px}
+.chk{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 2px;border:0;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left}
+.chk:last-child{border-bottom:0}
+.chk .box{width:24px;height:24px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;color:#fff}
+.chk .box svg{width:14px;height:14px;stroke-width:3}
+.chk[aria-checked="true"] .box{background:var(--primary);border-color:var(--primary)}
+.famopt{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 2px;border:0;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left}
+
 /* login */
 .login{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:24px 16px;
   background:radial-gradient(700px 420px at 10% -10%, #E2E4FF 0, transparent 60%), radial-gradient(600px 420px at 100% 0%, #EFE6FF 0, transparent 55%), var(--bg)}
@@ -507,10 +526,15 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
       </div>
     </section>
 
-    <section class="sec">
-      <div class="sec-h"><h2>Lainnya</h2></div>
+    <section class="sec" id="keluarga">
+      <div class="sec-h"><h2>Keluarga</h2><button class="link" id="addMember" hidden>+ Anggota</button></div>
       <div class="card" style="gap:0">
         <button class="set" id="setName"><span class="ic solid" style="--c:var(--pink)">ICON_USER</span><span><b>Nama keluarga</b></span><span class="val" id="valName">—</span></button>
+        <div id="famMembers"></div>
+      </div>
+      <div class="card" style="gap:0">
+        <button class="set" id="switchFam"><span class="ic solid" style="--c:var(--blue)"><svg class="i" viewBox="0 0 24 24"><path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></svg></span><span><b>Ganti / buat keluarga</b><small id="famCount"></small></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="set" id="leaveFam" hidden><span class="ic solid" style="--c:var(--red)"><svg class="i" viewBox="0 0 24 24"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/></svg></span><span><b>Keluar dari keluarga ini</b></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
       </div>
     </section>
 
@@ -546,6 +570,17 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
     <div class="login-msg" id="loginMsg"></div>
     <button type="button" class="linkbtn" id="loginOut" hidden>Masuk dengan akun lain</button>
   </div>
+</div>
+<div class="login" id="onboard" hidden>
+  <form class="login-card" id="obForm" novalidate>
+    <div class="login-logo"><svg class="i" viewBox="0 0 24 24" style="stroke-width:2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></svg></div>
+    <h1>Belum ada keluarga</h1>
+    <p>Buat keluarga baru, atau minta anggota keluarga menambahkan <b id="obEmail" style="color:var(--ink)"></b>.</p>
+    <div class="field" style="width:100%;text-align:left"><label for="obName">Nama keluarga</label><input id="obName" maxlength="30" placeholder="mis. WHY Family"></div>
+    <button type="submit" class="btn primary" id="obCreate">Buat keluarga</button>
+    <div class="login-msg" id="obMsg"></div>
+    <button type="button" class="linkbtn" id="obOut">Masuk dengan akun lain</button>
+  </form>
 </div>
 <input type="file" id="importFile" accept="application/json,.json" hidden>
 <div class="picker-scrim" id="picker" hidden><div class="picker" role="listbox" id="pickerPanel"></div></div>
@@ -741,11 +776,15 @@ const ymOf = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
 let ym = ymOf(today);
 let screen = "beranda", txFilter = "all", txQuery = "";
 
-const S = { bills:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[] };
+const S = { bills:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[], family:{ meta:{}, members:{} }, myFamilies:[], famNames:{} };
 function setTxAll(list){ S.txAll = list; S.tx = list.filter(t=>t.month===ym); }
 let db = null, auth = null, canWrite = true, mode = "connecting", currentUser = null;
-const CFG = window.KAS_CONFIG || {};
-const ROOT = "keluarga/" + (CFG.familyId || "utama");
+let FID = null, ROOT = null, ME = null;                 // current family, its data path, my email key
+const famPath = p => "families/" + FID + "/" + p;
+const emailKey = e => String(e||"").trim().toLowerCase().replace(/\./g, ",");
+const keyEmail = k => String(k||"").replace(/,/g, ".");
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k,v) => { try { localStorage.setItem(k, v); } catch(e){} };
 /* ---------- Realtime Database adapter ----------
    The app talks to a small document/collection API; this maps it onto Firebase Realtime Database:
    keluarga/<familyId>/<collection>/<id> = JSON object. */
@@ -1209,6 +1248,7 @@ function renderProfile(c){
   $("valCats").textContent = n ? `${n} kategori` : "Atur";
   $("valName").textContent = name;
   ["setIncomeDefault","setIncomeMonth","setGroc2","addCatBudget2","setName"].forEach(id=>$(id).disabled=!canWrite);
+  renderFamily();
 }
 
 /* ---------- navigation ---------- */
@@ -1233,9 +1273,7 @@ function fail(e){
 }
 const isDenied = e => !!e && /permission[_-]denied/i.test((e.code||"") + " " + (e.message||""));
 function onDbErr(e){ if (isDenied(e)) denied(); else console.warn(e); }
-function denied(){
-  showLogin(`Akun ${currentUser?currentUser.email:""} belum diizinkan membuka Kas Keluarga ini. Minta pemilik menambahkan email Anda di aturan database.`, true);
-}
+function denied(){ toast("Anda tidak punya akses untuk ini."); }
 function subMonth(){
   if (mode!=="cloud"){ setTxAll(S.txAll); render(); return; }
   unsubs.forEach(u=>u()); unsubs = [];
@@ -1258,19 +1296,39 @@ async function saveTx(id, data){
 }
 async function delTx(id){ if (mode==="cloud") await write(col("tx").doc(id).delete()); else { setTxAll(S.txAll.filter(t=>t.id!==id)); render(); } }
 async function savePlan(id, data){
-  if (mode==="cloud") await write(col("plans").doc(id).set(data));
-  else { const i=S.plans.findIndex(p=>p.id===id), v={id,...data}; if (i>=0) S.plans[i]=v; else S.plans.push(v); render(); }
+  if (mode!=="cloud"){ const i=S.plans.findIndex(p=>p.id===id), v={id,...data}; if (i>=0) S.plans[i]=v; else S.plans.push(v); render(); return; }
+  const prev = S.plans.find(p=>p.id===id);
+  const body = { ...data, members: (prev && prev.members) || { [ME]: true }, owner: (prev && prev.owner) || ME };
+  delete body.id;
+  const upd = { [famPath("plans/"+id)]: clean(body) };
+  if (!prev) upd[famPath("planIndex/"+ME+"/"+id)] = true;
+  await write(rdb.ref().update(upd));
 }
 async function deletePlan(id){
-  const txs = S.planTx.filter(t=>t.planId===id);
-  if (mode==="cloud"){ const b = db.batch(); txs.forEach(t=>b.delete(col("plantx").doc(t.id))); b.delete(col("plans").doc(id)); await write(b.commit()); }
-  else { S.planTx = S.planTx.filter(t=>t.planId!==id); S.plans = S.plans.filter(p=>p.id!==id); render(); }
+  if (mode!=="cloud"){ S.planTx = S.planTx.filter(t=>t.planId!==id); S.plans = S.plans.filter(p=>p.id!==id); render(); return; }
+  const p = S.plans.find(x=>x.id===id); if (!p) return;
+  const upd = { [famPath("plans/"+id)]: null, [famPath("plantx/"+id)]: null };
+  Object.keys(p.members||{}).forEach(ek=>{ upd[famPath("planIndex/"+ek+"/"+id)] = null; });
+  await write(rdb.ref().update(upd));
+}
+async function setPlanMembers(id, keys){
+  const p = S.plans.find(x=>x.id===id); if (!p) return;
+  const next = Object.fromEntries([...new Set([ME, ...keys])].map(k=>[k,true]));
+  const upd = { [famPath("plans/"+id+"/members")]: next };
+  Object.keys(next).forEach(k=>{ if (!(p.members||{})[k]) upd[famPath("planIndex/"+k+"/"+id)] = true; });
+  Object.keys(p.members||{}).forEach(k=>{ if (!next[k]) upd[famPath("planIndex/"+k+"/"+id)] = null; });
+  await write(rdb.ref().update(upd));
 }
 async function savePlanTx(id, data){
-  if (mode==="cloud") await write((id ? col("plantx").doc(id) : col("plantx").doc()).set(data));
-  else { if (id) S.planTx = S.planTx.map(t=>t.id===id?{id,...data}:t); else S.planTx.push({id:"p"+Date.now(),...data}); render(); }
+  if (mode!=="cloud"){ if (id) S.planTx = S.planTx.map(t=>t.id===id?{id,...data}:t); else S.planTx.push({id:"p"+Date.now(),...data}); render(); return; }
+  const c = colRef(famPath("plantx/"+data.planId));
+  await write((id ? c.doc(id) : c.doc()).set(data));
 }
-async function delPlanTx(id){ if (mode==="cloud") await write(col("plantx").doc(id).delete()); else { S.planTx = S.planTx.filter(t=>t.id!==id); render(); } }
+async function delPlanTx(id){
+  if (mode!=="cloud"){ S.planTx = S.planTx.filter(t=>t.id!==id); render(); return; }
+  const t = S.planTx.find(x=>x.id===id); if (!t) return;
+  await write(docRef(famPath("plantx/"+t.planId+"/"+id)).delete());
+}
 async function saveSettings(patch){ const next={...S.settings, ...patch}; if (mode==="cloud") await write(dref("settings/main").set(next)); else { S.settings=next; render(); } }
 
 /* ---------- icon picker ---------- */
@@ -1529,6 +1587,7 @@ function openPlan(id){
     `<div class="advice">Kurang <b>${rp(st.budget-st.saved)}</b></div>`;
   openSheet("Rencana khusus", `
     <div class="phead">${planIcon(p,true)}<div style="min-width:0"><b>${esc(p.name)}</b><small>${w.range}</small></div><span style="margin-left:auto">${w.tag}</span></div>
+    <div class="access">${Object.keys(p.members||{}).map(ek=>`<span class="achip">${memberAvatar((S.family.members||{})[ek], ek)}${esc(ek===ME?"Anda":memberName(ek).split(" ")[0])}</span>`).join("")}${canWrite?`<button type="button" class="link" id="pAccess">Atur akses</button>`:""}</div>
     <div class="pstats">
       <div class="stat"><small>Anggaran</small><b>${rp(st.budget)}</b></div>
       <div class="stat"><small>Terkumpul</small><b class="down">${rp(st.saved)}</b></div>
@@ -1550,6 +1609,7 @@ function openPlan(id){
   if (!canWrite) return;
   sheet.querySelectorAll("[data-pitemadd]").forEach(b=>b.onclick=()=>openPlanTx(p.id, "exp", null, { item: b.dataset.pitemadd }));
   $("pSave").onclick = ()=>openPlanTx(p.id, "save");
+  $("pAccess").onclick = ()=>openPlanAccess(p.id);
   $("pSpend").onclick = ()=>openPlanTx(p.id, "exp");
   $("pEdit").onclick = ()=>openPlanEdit(p.id);
   $("pDone").onclick = async()=>{ try { const {id:_omit, ...body} = p; await savePlan(p.id, {...body, done:!p.done}); toast(p.done?"Rencana aktif lagi":"Rencana ditandai selesai"); setTimeout(()=>openPlan(p.id),150); } catch(e){ fail(e); } };
@@ -1760,7 +1820,8 @@ function openCatBudget(cat){
 function openName(){
   openSheet("Nama keluarga", `<div class="field"><label for="famName">Nama</label><input id="famName" maxlength="30" value="${esc(S.settings.familyName||"")}" placeholder="mis. Keluarga Wahyu"></div>
     <div class="actions"><button type="submit" class="btn primary">Simpan</button></div>`,
-    async ()=>{ await saveSettings({familyName:$("famName").value.trim()}); toast("Nama disimpan"); }, "famName");
+    async ()=>{ const nm = $("famName").value.trim(); await saveSettings({familyName:nm});
+      if (canManage() && nm) await write(rdb.ref(famPath("meta/name")).set(nm)); toast("Nama disimpan"); }, "famName");
 }
 
 /* ---------- events ---------- */
@@ -1808,6 +1869,115 @@ document.addEventListener("click", async e=>{
     try { if (k==="plan"){ await delPlanTx(id); toast("Catatan rencana dihapus"); } else if (k==="bill"){ await setPaid(id,null); toast("Pembayaran dihapus, tagihan kembali belum lunas"); } else { await delTx(id); toast("Transaksi dihapus"); } } catch(err){ fail(err); } }
 });
 
+/* ---------- family ---------- */
+const myRole = () => ((S.family.members||{})[ME]||{}).role || "member";
+const canManage = () => ["owner","admin"].includes(myRole());
+const ROLE_LBL = { owner:"Pemilik", admin:"Admin", member:"Anggota" };
+function memberAvatar(m, ek){
+  const nm = (m && m.name) || keyEmail(ek);
+  return `<span class="mav">${m && m.photo ? `<img src="${esc(m.photo)}" alt="" referrerpolicy="no-referrer">` : esc(nm.trim()[0]||"?").toUpperCase()}</span>`;
+}
+const memberName = ek => { const m = (S.family.members||{})[ek]; return (m && m.name) || keyEmail(ek); };
+function renderFamily(){
+  const mem = S.family.members || {};
+  const order = { owner:0, admin:1, member:2 };
+  const rows = Object.entries(mem).sort((a,b)=>(order[a[1].role]??3)-(order[b[1].role]??3) || keyEmail(a[0]).localeCompare(keyEmail(b[0])));
+  $("famMembers").innerHTML = rows.map(([ek,m])=>{
+    const manage = canManage() && ek!==ME && (myRole()==="owner" || m.role!=="owner");
+    return `<div class="mrow">${memberAvatar(m, ek)}<div style="min-width:0"><b>${esc(m.name||(m.email||keyEmail(ek)).split("@")[0])}${ek===ME?" (Anda)":""}</b><small>${esc(m.email||keyEmail(ek))}${m.name?"":" · belum masuk"}</small></div>
+      <div style="display:flex;gap:6px;align-items:center"><span class="role ${m.role}">${ROLE_LBL[m.role]||"Anggota"}</span>${manage?`<button type="button" class="btn-s" data-member="${esc(ek)}">Atur</button>`:""}</div></div>`; }).join("");
+  $("addMember").hidden = !canManage();
+  $("leaveFam").hidden = myRole()==="owner" || !FID;
+  $("famCount").textContent = S.myFamilies.length>1 ? `${S.myFamilies.length} keluarga` : "";
+}
+function openAddMember(){
+  openSheet("Tambah anggota", `
+    <div class="field"><label for="mEmail">Email Google</label><input id="mEmail" type="email" inputmode="email" autocomplete="off" placeholder="nama@gmail.com"></div>
+    <div class="field"><label for="mRole">Peran</label><select id="mRole"><option value="member">Anggota</option><option value="admin">Admin</option></select></div>
+    <div class="actions"><button type="submit" class="btn primary">Tambahkan</button></div>`,
+  async ()=>{
+    const email = $("mEmail").value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ toast("Email belum benar"); $("mEmail").focus(); return false; }
+    const ek = emailKey(email);
+    if ((S.family.members||{})[ek]){ toast("Sudah jadi anggota"); return false; }
+    await write(rdb.ref().update({
+      [famPath("members/"+ek)]: { email, role: $("mRole").value, addedBy: ME, addedAt: Date.now() },
+      ["userFamilies/"+ek+"/"+FID]: true }));
+    toast(`${email} ditambahkan`);
+  }, "mEmail");
+}
+function openMember(ek){
+  const m = (S.family.members||{})[ek]; if (!m) return;
+  let role = m.role;
+  openSheet(esc(m.name || keyEmail(ek)), `
+    <div class="mrow" style="border:0;padding:0">${memberAvatar(m, ek)}<div style="min-width:0"><b>${esc(m.name||keyEmail(ek))}</b><small>${esc(m.email||keyEmail(ek))}</small></div><span></span></div>
+    <div class="seg two" role="group" aria-label="Peran">
+      <button type="button" id="rMem" aria-pressed="${role==="member"}">Anggota</button>
+      <button type="button" id="rAdm" aria-pressed="${role==="admin"}">Admin</button>
+    </div>
+    <div class="actions"><button type="submit" class="btn primary">Simpan</button><button type="button" class="btn danger" id="mDel">Hapus dari keluarga</button></div>`,
+  async ()=>{ if (role!==m.role){ await write(rdb.ref(famPath("members/"+ek+"/role")).set(role)); toast("Peran diperbarui"); } }, null);
+  const setR = r=>{ role=r; $("rMem").setAttribute("aria-pressed", r==="member"); $("rAdm").setAttribute("aria-pressed", r==="admin"); };
+  $("rMem").onclick=()=>setR("member"); $("rAdm").onclick=()=>setR("admin");
+  $("mDel").onclick = async ()=>{
+    if (!(await askDelete("Hapus anggota?", `${eB(m.email||keyEmail(ek))} tidak bisa lagi membuka data keluarga ini.`, "Hapus"))) return;
+    await write(rdb.ref().update({ [famPath("members/"+ek)]: null, ["userFamilies/"+ek+"/"+FID]: null }));
+    closeSheet(); toast("Anggota dihapus");
+  };
+}
+function openSwitchFamily(){
+  const list = S.myFamilies.map(fid=>`<button type="button" class="famopt" data-fam="${esc(fid)}"><span class="ic solid" style="--c:${fid===FID?"var(--primary)":"var(--grey)"}">${ico("users")}</span><span><b>${esc(S.famNames[fid]||"Keluarga")}</b>${fid===FID?`<small class="muted">Sedang dibuka</small>`:""}</span>${fid===FID?ico("check"):""}</button>`).join("");
+  openSheet("Keluarga", `<div style="display:grid">${list}</div>
+    <div class="field"><label for="nfName">Buat keluarga baru</label><input id="nfName" maxlength="30" placeholder="Nama keluarga"></div>
+    <div class="actions"><button type="submit" class="btn primary">Buat keluarga</button></div>`,
+  async ()=>{ const nm = $("nfName").value.trim(); if (!nm){ $("nfName").focus(); return false; } await createFamily(nm); }, null);
+  sheet.querySelectorAll("[data-fam]").forEach(b=>b.onclick=()=>{ if (b.dataset.fam!==FID) openFamily(b.dataset.fam); closeSheet(); });
+}
+async function createFamily(name){
+  const fid = rdb.ref("families").push().key, u = currentUser;
+  await rdb.ref().update({
+    ["families/"+fid+"/meta"]: { name, owner: u.uid, ownerEmail: u.email, created: Date.now() },
+    ["families/"+fid+"/members/"+ME]: { email: u.email.toLowerCase(), role: "owner", name: u.displayName || "", photo: u.photoURL || "", addedAt: Date.now() },
+    ["userFamilies/"+ME+"/"+fid]: true });
+  // move data from the old single-family setup once, if this account can still read it
+  let moved = false;
+  try {
+    const old = (await rdb.ref("keluarga/utama").get()).val();
+    if (old && !old._migrated){
+      const upd = {}, base = "families/"+fid+"/";
+      ["bills","months","tx"].forEach(c=>Object.entries(old[c]||{}).forEach(([id,v])=>{ upd[base+"data/"+c+"/"+id] = v; }));
+      upd[base+"data/settings/main"] = { ...((old.settings||{}).main||{}), familyName: name };
+      Object.entries(old.plans||{}).forEach(([id,v])=>{ upd[base+"plans/"+id] = { ...v, members:{ [ME]:true }, owner: ME }; upd[base+"planIndex/"+ME+"/"+id] = true; });
+      await rdb.ref().update(upd);
+      // plan records must exist before their entries can be written
+      const ptx = {};
+      Object.entries(old.plantx||{}).forEach(([id,v])=>{ if (v && v.planId) ptx[base+"plantx/"+v.planId+"/"+id] = v; });
+      if (Object.keys(ptx).length) await rdb.ref().update(ptx);
+      await rdb.ref("keluarga/utama/_migrated").set(fid).catch(()=>{});
+      moved = true;
+    }
+  } catch(e){ /* no old data or no access */ }
+  if (!moved) await rdb.ref("families/"+fid+"/data/settings/main").set({ familyName: name });
+  openFamily(fid);
+  toast(moved ? "Keluarga dibuat, data lama dipindahkan" : "Keluarga dibuat");
+}
+async function leaveFamily(){
+  if (!(await askDelete("Keluar dari keluarga?", `Anda tidak akan bisa membuka data ${eB(S.famNames[FID]||"keluarga ini")} lagi sampai ditambahkan kembali.`, "Keluar"))) return;
+  const fid = FID;
+  await rdb.ref().update({ [famPath("members/"+ME)]: null, ["userFamilies/"+ME+"/"+fid]: null }).catch(fail);
+}
+function openPlanAccess(pid){
+  const p = S.plans.find(x=>x.id===pid); if (!p) return;
+  const sel = new Set(Object.keys(p.members||{}));
+  const others = Object.entries(S.family.members||{}).filter(([ek])=>ek!==ME);
+  openSheet("Akses rencana", `
+    <div style="display:grid">${others.length ? others.map(([ek,m])=>`<button type="button" class="chk" role="checkbox" data-acc="${esc(ek)}" aria-checked="${sel.has(ek)}">${memberAvatar(m, ek)}<span style="min-width:0"><b style="display:block;font-size:13.5px">${esc(m.name||keyEmail(ek))}</b><small class="muted">${esc(m.email||keyEmail(ek))}</small></span><span class="box">${ico("check")}</span></button>`).join("")
+      : `<div class="empty">Belum ada anggota lain. Tambahkan di Profil → Keluarga.</div>`}</div>
+    <div class="actions"><button type="submit" class="btn primary">Simpan</button></div>`,
+  async ()=>{ await setPlanMembers(pid, [...sel]); toast("Akses diperbarui"); setTimeout(()=>openPlan(pid),200); }, null);
+  sheet.querySelectorAll("[data-acc]").forEach(b=>b.onclick=()=>{ const k=b.dataset.acc; if (sel.has(k)) sel.delete(k); else sel.add(k); b.setAttribute("aria-checked", sel.has(k)); });
+}
+
 /* ---------- auth & boot ---------- */
 function showLogin(msg, isError){
   $("login").hidden = false;
@@ -1834,20 +2004,81 @@ $("googleBtn").onclick = async ()=>{
 $("loginOut").onclick = ()=>auth.signOut();
 $("logoutBtn").onclick = async ()=>{ if (await askDelete("Keluar dari akun?", `Anda keluar dari ${eB(currentUser?currentUser.email:"akun ini")}. Data tetap aman di Firebase.`, "Keluar")) auth.signOut(); };
 
-let started = false, rootUnsubs = [];
+let started = false, rootUnsubs = [], famListOff = null, selfSynced = false;
 function startData(){
-  if (started) return; started = true;
-  mode = "cloud";
-  rootUnsubs.push(col("bills").onSnapshot(s=>{ S.bills = s.docs.map(d=>({id:d.id,...d.data()})).sort(sortBills); $("login").hidden = true; render(); }, onDbErr));
+  if (started || !FID) return; started = true;
+  mode = "cloud"; selfSynced = false;
+  rootUnsubs.push(col("bills").onSnapshot(s=>{ S.bills = s.docs.map(d=>({id:d.id,...d.data()})).sort(sortBills); render(); }, onDbErr));
   rootUnsubs.push(dref("settings/main").onSnapshot(s=>{ S.settings = s.exists ? s.data() : {}; render(); }, onDbErr));
-  rootUnsubs.push(col("plans").onSnapshot(s=>{ S.plans = s.docs.map(d=>({id:d.id,...d.data()})); render(); }, onDbErr));
-  rootUnsubs.push(col("plantx").onSnapshot(s=>{ S.planTx = s.docs.map(d=>({id:d.id,...d.data()})); render(); }, onDbErr));
+  rootUnsubs.push(docRef(famPath("meta")).onSnapshot(s=>{ S.family.meta = s.data(); S.famNames[FID] = S.family.meta.name || S.famNames[FID]; render(); }, onDbErr));
+  rootUnsubs.push(colRef(famPath("members")).onSnapshot(s=>{
+    S.family.members = Object.fromEntries(s.docs.map(d=>[d.id, d.data()]));
+    const mine = S.family.members[ME], u = currentUser;
+    if (mine && !selfSynced && u && (mine.name !== (u.displayName||"") || mine.photo !== (u.photoURL||""))){
+      selfSynced = true; rdb.ref(famPath("members/"+ME)).update({ name: u.displayName||"", photo: u.photoURL||"", email: u.email.toLowerCase() }).catch(()=>{});
+    }
+    render(); }, onDbErr));
+  // private plans: only the ones listed in my plan index
+  const planOffs = {};
+  const idxRef = rdb.ref(famPath("planIndex/"+ME));
+  const idxCb = snap=>{
+    const ids = Object.keys(snap.val()||{});
+    Object.keys(planOffs).forEach(pid=>{ if (!ids.includes(pid)){ planOffs[pid](); delete planOffs[pid];
+      S.plans = S.plans.filter(p=>p.id!==pid); S.planTx = S.planTx.filter(t=>t.planId!==pid); } });
+    ids.forEach(pid=>{ if (planOffs[pid]) return;
+      const u1 = docRef(famPath("plans/"+pid)).onSnapshot(sn=>{ S.plans = S.plans.filter(p=>p.id!==pid); if (sn.exists) S.plans.push({ id:pid, ...sn.data() }); render(); },
+        ()=>{ S.plans = S.plans.filter(p=>p.id!==pid); render(); });
+      const u2 = colRef(famPath("plantx/"+pid)).onSnapshot(sn=>{ S.planTx = S.planTx.filter(t=>t.planId!==pid).concat(sn.docs.map(d=>({ id:d.id, ...d.data(), planId:pid }))); render(); },
+        ()=>{ S.planTx = S.planTx.filter(t=>t.planId!==pid); render(); });
+      planOffs[pid] = ()=>{ u1(); u2(); };
+    });
+    render();
+  };
+  idxRef.on("value", idxCb, e=>console.warn(e));
+  rootUnsubs.push(()=>{ idxRef.off("value", idxCb); Object.values(planOffs).forEach(f=>f()); });
   subMonth();
 }
 function stopData(){
   rootUnsubs.forEach(u=>u()); rootUnsubs = []; unsubs.forEach(u=>u()); unsubs = []; started = false;
-  Object.assign(S, { bills:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[] });
+  Object.assign(S, { bills:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[], family:{ meta:{}, members:{} } });
 }
+function openFamily(fid){
+  if (fid === FID && started) return;
+  stopData(); FID = fid; ROOT = "families/" + fid + "/data"; lsSet("kas-fid", fid);
+  $("onboard").hidden = true; startData(); syncLabel(); render();
+}
+function watchMyFamilies(){
+  if (famListOff) famListOff();
+  const ref = rdb.ref("userFamilies/" + ME);
+  const cb = snap=>{
+    const ids = Object.keys(snap.val()||{});
+    S.myFamilies = ids;
+    ids.forEach(fid=>{ if (!S.famNames[fid]) rdb.ref("families/"+fid+"/meta/name").get().then(s=>{ S.famNames[fid] = s.val() || "Keluarga"; render(); }).catch(()=>{}); });
+    if (!ids.length){ stopData(); FID = null; ROOT = null; mode = "connecting"; showOnboard(); render(); return; }
+    const pref = lsGet("kas-fid");
+    const pick = ids.includes(FID) ? FID : ids.includes(pref) ? pref : ids[0];
+    if (pick !== FID || !started) openFamily(pick); else render();
+  };
+  ref.on("value", cb, e=>{ console.warn(e); showOnboard(); });
+  famListOff = ()=>ref.off("value", cb);
+}
+function showOnboard(){
+  $("onboard").hidden = false; $("obEmail").textContent = currentUser ? currentUser.email : "";
+  $("obMsg").textContent = "";
+}
+$("obForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const nm = $("obName").value.trim(); if (!nm){ $("obName").focus(); return; }
+  $("obCreate").disabled = true; $("obMsg").className = "login-msg info"; $("obMsg").textContent = "Membuat keluarga…";
+  try { await createFamily(nm); }
+  catch(err){ $("obMsg").className = "login-msg"; $("obMsg").textContent = "Gagal membuat keluarga. Pastikan aturan database terbaru sudah dipasang."; console.warn(err); }
+  finally { $("obCreate").disabled = false; }
+});
+$("obOut").onclick = ()=>auth.signOut();
+$("addMember").onclick = openAddMember;
+$("switchFam").onclick = openSwitchFamily;
+$("leaveFam").onclick = leaveFamily;
+document.addEventListener("click", e=>{ const m = e.target.closest("[data-member]"); if (m) openMember(m.dataset.member); });
 let online = true, onlineSeen = false;
 function syncLabel(){
   if (mode!=="cloud") return;
@@ -1876,42 +2107,49 @@ go(["beranda","transaksi","anggaran","profil"].includes(h0) ? h0 : "beranda");
   auth.getRedirectResult().catch(e=>{ if (e && e.code && e.code!=="auth/no-auth-event") showLogin("Gagal masuk: " + (e.message||e.code), true); });
   auth.onAuthStateChanged(user=>{
     currentUser = user;
-    if (!user){ stopData(); mode = "connecting"; showLogin(); render(); return; }
+    if (!user){ if (famListOff){ famListOff(); famListOff = null; } stopData(); FID = null; ROOT = null; ME = null; mode = "connecting"; $("onboard").hidden = true; showLogin(); render(); return; }
+    ME = emailKey(user.email);
     $("userEmail").textContent = user.email || "";
     $("login").hidden = true;
-    startData(); syncLabel();
+    watchMyFamilies();
   });
 })();
 
 /* ---------- export / import ---------- */
-const COLLS = ["bills","settings","months","tx","plans","plantx"];
+const COLLS = ["bills","settings","months","tx"];
 $("exportBtn").onclick = async ()=>{
-  if (mode!=="cloud") return toast("Hubungkan Firebase dulu untuk ekspor data.");
+  if (mode!=="cloud") return toast("Buka keluarga dulu untuk ekspor data.");
   try {
     const data = {};
     for (const c of COLLS){ const snap = await col(c).get(); data[c] = {}; snap.forEach(d=>{ data[c][d.id] = d.data(); }); }
-    const blob = new Blob([JSON.stringify({ app:"kas-keluarga", version:1, exportedAt:new Date().toISOString(), data }, null, 2)], { type:"application/json" });
+    data.plans = Object.fromEntries(S.plans.map(p=>{ const { id, members, owner, ...rest } = p; return [id, rest]; }));
+    data.plantx = Object.fromEntries(S.planTx.map(t=>{ const { id, ...rest } = t; return [id, rest]; }));
+    const blob = new Blob([JSON.stringify({ app:"kas-keluarga", version:2, exportedAt:new Date().toISOString(), data }, null, 2)], { type:"application/json" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `kas-keluarga-${todayISO}.json`;
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
     toast("Cadangan diunduh");
   } catch(e){ fail(e); }
 };
-$("importBtn").onclick = ()=>{ if (mode!=="cloud") return toast("Hubungkan Firebase dulu untuk impor data."); $("importFile").value = ""; $("importFile").click(); };
+$("importBtn").onclick = ()=>{ if (mode!=="cloud") return toast("Buka keluarga dulu untuk impor data."); $("importFile").value = ""; $("importFile").click(); };
 $("importFile").onchange = async e=>{
   const f = e.target.files[0]; if (!f) return;
   let json; try { json = JSON.parse(await f.text()); } catch(err){ return toast("File tidak bisa dibaca. Pastikan file JSON dari Kas Keluarga."); }
   const data = json && json.data; if (!data || typeof data!=="object") return toast("Format file tidak dikenali.");
-  const counts = COLLS.map(c=>[c, Object.keys(data[c]||{}).length]).filter(r=>r[1]);
+  const ALL = [...COLLS, "plans", "plantx"];
+  const counts = ALL.map(c=>[c, Object.keys(data[c]||{}).length]).filter(r=>r[1]);
   const total = counts.reduce((a,r)=>a+r[1],0); if (!total) return toast("File cadangan kosong.");
   const names = { bills:"tagihan", settings:"pengaturan", months:"data bulan", tx:"transaksi", plans:"rencana", plantx:"catatan rencana" };
-  if (!(await askDelete("Impor data?", `${counts.map(([c,n])=>`${eB(n)} ${names[c]}`).join(", ")} akan ditambahkan. Catatan dengan ID yang sama akan ditimpa.`, "Impor", "primary"))) return;
+  if (!(await askDelete("Impor data?", `${counts.map(([c,n])=>`${eB(n)} ${names[c]}`).join(", ")} akan ditambahkan ke ${eB(S.famNames[FID]||"keluarga ini")}.`, "Impor", "primary"))) return;
   try {
-    let batch = db.batch(), n = 0;
-    for (const c of COLLS) for (const [id, body] of Object.entries(data[c]||{})){
-      batch.set(col(c).doc(id), body); n++;
-      if (n % 400 === 0){ await write(batch.commit()); batch = db.batch(); }
-    }
-    await write(batch.commit());
+    const upd = {};
+    COLLS.forEach(c=>Object.entries(data[c]||{}).forEach(([id,body])=>{ upd[ROOT+"/"+c+"/"+id] = clean(body); }));
+    Object.entries(data.plans||{}).forEach(([id,body])=>{ const ex = S.plans.find(p=>p.id===id);
+      upd[famPath("plans/"+id)] = clean({ ...body, members: (ex&&ex.members) || { [ME]:true }, owner: (ex&&ex.owner) || ME });
+      upd[famPath("planIndex/"+ME+"/"+id)] = true; });
+    await write(rdb.ref().update(upd));
+    const ptx = {};
+    Object.entries(data.plantx||{}).forEach(([id,body])=>{ if (body && body.planId) ptx[famPath("plantx/"+body.planId+"/"+id)] = clean(body); });
+    if (Object.keys(ptx).length) await write(rdb.ref().update(ptx));
     toast(`${total} catatan diimpor`);
   } catch(err){ fail(err); }
 };
