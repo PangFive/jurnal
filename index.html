@@ -404,6 +404,37 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .seg.spacesw button{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 6px;font-size:12.5px}
 .seg.spacesw svg{width:16px;height:16px}
 
+/* header avatar */
+.tl{display:flex;align-items:center;gap:10px;min-width:0}
+.meav{width:40px;height:40px;border-radius:50%;border:2px solid #fff;padding:0;display:grid;place-items:center;background:linear-gradient(135deg,var(--primary),#C9B6FF);color:#fff;font-weight:800;font-size:15px;overflow:hidden;flex:none;box-shadow:var(--shadow)}
+.meav img{width:100%;height:100%;object-fit:cover}
+
+/* tabungan */
+.balance.sav{background:linear-gradient(135deg,#0E8F67 0%,#14B8A6 55%,#38BDF8 100%);box-shadow:0 14px 34px rgba(20,184,166,.3), inset 0 1px 0 rgba(255,255,255,.45)}
+button.wallet{cursor:pointer;padding:0}
+button.wallet span{background:rgba(255,255,255,.22);box-shadow:none}
+button.wallet.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ic.sym{font-weight:800;font-size:13px;letter-spacing:-.02em;font-family:var(--f)}
+.ic.sym.sm{width:34px;height:34px;font-size:11.5px}
+.pct{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.pct.pos{background:#E2F6EE;color:var(--green)} .pct.neg{background:#FDE7E7;color:var(--red)} .pct.zero{background:var(--sunk);color:var(--muted)}
+.calhead{border:0;background:none;padding:0;display:flex;align-items:center;gap:6px;color:var(--ink)}
+.calhead svg{width:18px;height:18px;color:var(--muted);transition:transform .2s}
+.calhead[aria-expanded="false"] svg{transform:rotate(-90deg)}
+.savchart svg{width:100%;height:auto;display:block}
+.savlegend{display:flex;gap:14px;font-size:11.5px;color:var(--muted)}
+.savlegend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.assetchips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+.assetchips::-webkit-scrollbar{display:none}
+.assetchips button{flex:none;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:5px 10px 5px 5px;font-size:12.5px;font-weight:600}
+.assetchips button .ic{width:26px;height:26px;border-radius:8px;font-size:10px}
+.assetchips button[aria-pressed="true"]{border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+.seg.three{grid-template-columns:repeat(3,1fr)}
+.colorchips{display:flex;gap:8px;flex-wrap:wrap}
+.colorchips button{width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--line);background:var(--c)}
+.colorchips button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--c)}
+
 /* login */
 .login{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:24px 16px;
   background:radial-gradient(700px 420px at 10% -10%, #E2E4FF 0, transparent 60%), radial-gradient(600px 420px at 100% 0%, #EFE6FF 0, transparent 55%), var(--bg)}
@@ -423,7 +454,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 
 <div class="app">
   <header class="topbar">
-    <div class="tt" id="topTitle"><small>&nbsp;</small><h1>Kas Keluarga</h1></div>
+    <div class="tl"><button type="button" class="meav" id="meBtn" aria-label="Profil">K</button><div class="tt" id="topTitle"><small>&nbsp;</small><h1>Kas Keluarga</h1></div></div>
     <div class="monthnav" role="group" aria-label="Pilih bulan">
       <button id="prevM" aria-label="Bulan sebelumnya"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
       <span id="monthLbl"></span>
@@ -524,6 +555,28 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
     </section>
   </main>
 
+  <!-- TABUNGAN -->
+  <main class="screen" data-screen="tabungan" hidden>
+    <section class="balance sav" aria-label="Total tabungan">
+      <div class="bal-top">
+        <div><div class="bal-lbl">Total tabungan</div><div class="bal-big" id="savTotal">Rp 0</div><div class="bal-trend" id="savTrend"></div></div>
+        <button type="button" class="wallet" id="savRefresh" aria-label="Perbarui harga"><span><svg class="i" viewBox="0 0 24 24" style="color:#fff"><path d="M20 11a8 8 0 0 0-14.9-3M4 13a8 8 0 0 0 14.9 3"/><path d="M20 4v4h-4M4 20v-4h4"/></svg></span></button>
+      </div>
+      <div class="bal-stats">
+        <div><small>Modal</small><b id="savCost">Rp 0</b></div>
+        <div><small>Untung / rugi</small><b id="savGain">Rp 0</b></div>
+        <div><small>Bulan ini</small><b id="savMonth">—</b></div>
+        <div><small>Harga diperbarui</small><b id="savUpdated">—</b></div>
+      </div>
+    </section>
+    <div class="pbtns"><button type="button" class="btn primary" id="savAdd">+ Tambah</button><button type="button" class="btn ghost" id="savWd">Tarik</button></div>
+    <section class="sec"><div class="sec-h"><h2>Porsi</h2><span class="muted" style="font-size:12px" id="savPieMeta"></span></div><div class="card" id="savPie"></div></section>
+    <section class="sec"><div class="sec-h"><h2>Pertumbuhan</h2><span id="savGrowthMeta"></span></div><div class="card" id="savChart"></div></section>
+    <section class="sec"><div class="sec-h"><h2>Aset</h2><button class="link" id="savNewAsset">+ Aset</button></div><div class="card" id="savAssets" style="gap:0"></div></section>
+    <section class="sec"><div class="sec-h"><button type="button" class="calhead" id="savCalToggle" aria-expanded="true"><h2>Kalender</h2><svg class="i" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><span class="muted" style="font-size:12px" id="savCalMeta"></span></div><div class="card" id="savCal"></div></section>
+    <section class="sec"><div class="sec-h"><h2>Riwayat</h2></div><div class="card"><ul class="list" id="savHist"></ul></div></section>
+  </main>
+
   <!-- PROFIL -->
   <main class="screen" data-screen="profil" hidden>
     <section class="card prof"><div class="avatar" id="profAvatar">K</div><div style="min-width:0"><b id="profName">Keluarga</b><small id="syncState">Menghubungkan…</small></div></section>
@@ -576,7 +629,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
     <button data-tab="transaksi"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Transaksi</button>
     <button class="fab" id="fab" aria-label="Catat transaksi"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
     <button data-tab="anggaran"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="17" rx="3"/><path d="M9 3v3M15 3v3M8.5 13l2.5 2.5 4.5-5"/></svg>Anggaran</button>
-    <button data-tab="profil"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profil</button>
+    <button data-tab="tabungan"><svg class="i" viewBox="0 0 24 24"><path d="M5 11a7 6 0 0 1 12-3l3-1-1 3.5a6 6 0 0 1 1 3.5l-2 1v3h-3v-2h-5v2H7v-3a6 6 0 0 1-2-4z"/><circle cx="15" cy="11" r=".8"/></svg>Tabungan</button>
   </div>
 </nav>
 
@@ -1021,6 +1074,8 @@ function render(){
   if (screen==="transaksi") renderTx(c);
   if (screen==="anggaran") renderBudget(c);
   if (screen==="profil") renderProfile(c);
+  if (screen==="tabungan") renderSavings();
+  renderMe();
   document.querySelectorAll("[data-needs-write]").forEach(el=>el.hidden=!canWrite);
   ["fab","addBill","addCatBudget","setGroc","addPlan"].forEach(id=>{ const el=$(id); if(el) el.hidden=!canWrite; });
 }
@@ -1028,7 +1083,7 @@ function renderTop(){
   const h = today.getHours();
   const greet = h<11 ? "Selamat pagi" : h<15 ? "Selamat siang" : h<18 ? "Selamat sore" : "Selamat malam";
   const name = S.settings.familyName || "Keluarga";
-  const titles = { beranda:[greet+",", name], transaksi:["Kas Keluarga","Transaksi"], anggaran:["Kas Keluarga","Anggaran"], profil:["Kas Keluarga","Profil"] };
+  const titles = { beranda:[greet+",", name], transaksi:["Kas Keluarga","Transaksi"], anggaran:["Kas Keluarga","Anggaran"], tabungan:["Kas Keluarga","Tabungan"], profil:["Kas Keluarga","Profil"] };
   const [sm, h1] = titles[screen];
   $("topTitle").innerHTML = `<small>${esc(sm)}</small><h1>${esc(h1)}</h1>`;
 }
@@ -1296,6 +1351,342 @@ function renderProfile(c){
   $("valName").textContent = name;
   ["setIncomeDefault","setIncomeMonth","setGroc2","addCatBudget2","setName"].forEach(id=>$(id).disabled=!canWrite);
   renderFamily();
+}
+
+/* ---------- tabungan (savings, separate from monthly money) ---------- */
+const SAV_PRESETS = [
+  { key:"gold",  name:"Emas fisik",      unit:"gram",   sym:"Au", color:"#D99A1E", src:"gold",        dec:3 },
+  { key:"idr",   name:"Rupiah",          unit:"IDR",    sym:"Rp", color:"#EB4747", src:"idr",         dec:0 },
+  { key:"usd",   name:"Dolar AS",        unit:"USD",    sym:"$",  color:"#1FAE78", src:"fx:USD",      dec:2 },
+  { key:"myr",   name:"Ringgit",         unit:"MYR",    sym:"RM", color:"#3B82F6", src:"fx:MYR",      dec:2 },
+  { key:"btc",   name:"Bitcoin",         unit:"BTC",    sym:"₿",  color:"#F7931A", src:"cg:bitcoin",  dec:8 },
+  { key:"eth",   name:"Ethereum",        unit:"ETH",    sym:"Ξ",  color:"#627EEA", src:"cg:ethereum", dec:6 },
+  { key:"sol",   name:"Solana",          unit:"SOL",    sym:"◎",  color:"#9945FF", src:"cg:solana",   dec:4 },
+  { key:"usdt",  name:"Tether",          unit:"USDT",   sym:"₮",  color:"#26A17B", src:"cg:tether",   dec:2 },
+  { key:"goldd", name:"Emas digital",    unit:"gram",   sym:"Au", color:"#F5B82E", src:"gold",        dec:4 },
+  { key:"sgd",   name:"Dolar Singapura", unit:"SGD",    sym:"S$", color:"#EC4899", src:"fx:SGD",      dec:2 },
+  { key:"depo",  name:"Deposito",        unit:"IDR",    sym:"D",  color:"#0E8F67", src:"idr",         dec:0 },
+  { key:"rd",    name:"Reksa dana",      unit:"unit",   sym:"RD", color:"#8B5CF6", src:"manual",      dec:4 },
+  { key:"saham", name:"Saham",           unit:"lembar", sym:"S",  color:"#0EA5E9", src:"manual",      dec:0 }
+];
+const SAV_DEFAULT = ["gold","idr","usd","myr","btc","eth","sol","usdt"];
+const SAV_COLORS = ["#D99A1E","#EB4747","#1FAE78","#3B82F6","#8B5CF6","#EC4899","#0EA5E9","#F97316","#14B8A6","#64748B"];
+S.sav = { assets:[], tx:[], prices:{}, snaps:{} };
+let savCalOpen = lsGet("kas-savcal") !== "0", savAutoAt = 0, savSnapAt = 0;
+
+const savCustom = () => S.sav.assets.map(a=>({ key:"c-"+a.id, id:a.id, name:a.name, unit:a.unit||"unit", sym:a.sym||(a.name||"?").slice(0,2), color:a.color||"#64748B", src:"manual", dec:4, custom:true }));
+const savAll = () => [...SAV_PRESETS, ...savCustom()];
+const savAsset = k => savAll().find(a=>a.key===k) || { key:k, name:k, unit:"unit", sym:"?", color:"#64748B", src:"manual", dec:4 };
+const isIdrUnit = a => a.src==="idr";
+function savVisible(st){
+  const shown = new Set([...SAV_DEFAULT, ...((S.settings.savShown)||[]), ...Object.keys(st.per)]);
+  return savAll().filter(a=>shown.has(a.key) || a.custom);
+}
+const symTile = (a, sm) => `<span class="ic solid sym${sm?" sm":""}" style="--c:${a.color}">${esc(a.sym)}</span>`;
+function parseQty(raw){
+  let x = String(raw||"").trim().replace(/\s/g,""); if (!x) return null;
+  if (x.includes(".") && x.includes(",")) x = x.replace(/\./g,"").replace(",",".");
+  else x = x.replace(",",".");
+  const n = parseFloat(x); return isFinite(n) && n>0 ? n : null;
+}
+const fmtQty = (q, a) => (Number(q)||0).toLocaleString("id-ID", { maximumFractionDigits: a.dec });
+function lastTxPrice(k){
+  const t = [...S.sav.tx].filter(x=>x.asset===k && x.kind!=="yield" && x.qty>0 && x.idr>0).sort((a,b)=>b.date.localeCompare(a.date)||(b.created||0)-(a.created||0))[0];
+  return t ? t.idr/t.qty : 0;
+}
+function savPrice(k){ const a = savAsset(k); if (isIdrUnit(a)) return 1; const p = S.sav.prices[k]; return p && p.price ? p.price : lastTxPrice(k); }
+function savStats(){
+  const per = {};
+  [...S.sav.tx].sort((a,b)=>a.date.localeCompare(b.date)||(a.created||0)-(b.created||0)).forEach(t=>{
+    const p = per[t.asset] || (per[t.asset] = { qty:0, cost:0, realized:0, yieldIdr:0, txs:[] });
+    const q = Number(t.qty)||0, v = Number(t.idr)||0;
+    if (t.kind==="add"){ p.qty += q; p.cost += v; }
+    else if (t.kind==="yield"){ p.qty += q; p.yieldIdr += v; }
+    else if (t.kind==="wd"){ const avg = p.qty>0 ? p.cost/p.qty : 0, c = avg*Math.min(q, p.qty); p.cost -= c; p.qty -= q; p.realized += v - c; if (p.qty < 1e-12){ p.qty = 0; p.cost = 0; } }
+    p.txs.push(t);
+  });
+  let value = 0, cost = 0;
+  Object.entries(per).forEach(([k,p])=>{ p.price = savPrice(k); p.value = p.qty*p.price; p.gain = p.value - p.cost; p.pct = p.cost>0 ? p.gain/p.cost*100 : null; value += p.value; cost += p.cost; });
+  return { per, value, cost, gain: value-cost, pct: cost>0 ? (value-cost)/cost*100 : null };
+}
+const pctChip = v => v==null ? `<span class="pct zero">—</span>` : `<span class="pct ${v>0.005?"pos":v<-0.005?"neg":"zero"}">${v>0?"+":""}${v.toLocaleString("id-ID",{maximumFractionDigits:2})}%</span>`;
+const signRp = v => (v>0?"+":v<0?"−":"") + rp(Math.abs(v)).replace("−","");
+function monthGrowth(st){
+  const start = `${ym}-01`;
+  const prev = Object.keys(S.sav.snaps||{}).filter(d=>d<start).sort().pop();
+  if (!prev) return null;
+  const v0 = S.sav.snaps[prev].value || 0; if (v0<=0) return null;
+  const net = S.sav.tx.filter(t=>t.month===ym).reduce((a,t)=>a + (t.kind==="add" ? (t.idr||0) : t.kind==="wd" ? -(t.idr||0) : 0), 0);
+  return (st.value - v0 - net) / v0 * 100;
+}
+function maybeSnapshot(st){
+  if (mode!=="cloud" || !(st.value>0) || Date.now()-savSnapAt < 15000) return;
+  const cur = (S.sav.snaps||{})[todayISO];
+  if (cur && Math.abs((cur.value||0) - Math.round(st.value)) < 1 && Math.abs((cur.cost||0) - Math.round(st.cost)) < 1) return;
+  savSnapAt = Date.now();
+  rdb.ref(ROOT+"/savSnaps/"+todayISO).set({ value: Math.round(st.value), cost: Math.round(st.cost) }).catch(()=>{});
+}
+async function refreshSavPrices(manual){
+  const btn = $("savRefresh"); btn.classList.add("spin");
+  let cg = {}, fx = null;
+  try { const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,tether,pax-gold&vs_currencies=idr"); if (r.ok) cg = await r.json(); } catch(e){}
+  try { const r = await fetch("https://open.er-api.com/v6/latest/USD"); if (r.ok) fx = await r.json(); } catch(e){}
+  btn.classList.remove("spin");
+  const out = {};
+  savAll().forEach(a=>{
+    const cur = S.sav.prices[a.key]; if (cur && cur.manual) return;
+    let pr = null;
+    if (a.src==="gold" && cg["pax-gold"]) pr = cg["pax-gold"].idr / 31.1034768;
+    else if (a.src.startsWith("cg:") && cg[a.src.slice(3)]) pr = cg[a.src.slice(3)].idr;
+    else if (a.src.startsWith("fx:") && fx && fx.rates && fx.rates.IDR && fx.rates[a.src.slice(3)]) pr = fx.rates.IDR / fx.rates[a.src.slice(3)];
+    if (pr) out[a.key] = { price: Math.round(pr*100)/100, updated: Date.now(), manual: false };
+  });
+  if (!Object.keys(out).length){ if (manual) toast("Harga belum bisa diambil. Periksa koneksi lalu coba lagi."); return; }
+  if (mode==="cloud"){ const upd = {}; Object.entries(out).forEach(([k,v])=>{ upd[ROOT+"/savPrices/"+k] = v; }); await write(rdb.ref().update(upd)); }
+  else { Object.assign(S.sav.prices, out); render(); }
+  if (manual) toast("Harga diperbarui");
+}
+function savAutoRefresh(){
+  const newest = Math.max(0, ...Object.values(S.sav.prices||{}).filter(p=>!p.manual).map(p=>p.updated||0));
+  if (Date.now() - newest > 30*60*1000 && Date.now() - savAutoAt > 5*60*1000){ savAutoAt = Date.now(); refreshSavPrices(false); }
+}
+function ringHtml(rows, total, centerLabel){
+  const gap = rows.length>1 ? 1.6 : 0; let deg = 0; const stops = [];
+  rows.forEach(r=>{ const span = r.v/total*360, a0 = deg+gap/2, a1 = deg+span-gap/2;
+    if (gap) stops.push(`#fff ${deg}deg ${a0}deg`);
+    stops.push(`${r.c} ${a0}deg`, `color-mix(in srgb, ${r.c} 62%, #ffffff) ${Math.max(a0,a1)}deg`);
+    if (gap) stops.push(`#fff ${a1}deg ${deg+span}deg`); deg += span; });
+  const pctOf = v => { const p = v/total*100; return p<1 ? "<1%" : Math.round(p)+"%"; };
+  return `<div class="ov"><div class="ring" role="img" aria-label="${esc(centerLabel)} ${rp(total)}"><div class="fill" style="background:conic-gradient(from -90deg, ${stops.join(",")})"></div>
+    <div class="ctr"><b>${short(total)}</b><small>${esc(centerLabel)}</small></div></div>
+    <ul class="ov-legend">${rows.map(r=>`<li style="--c:${r.c}"><i class="dot"></i><span>${esc(r.n)}<small>${rp(r.v)}</small></span><b>${pctOf(r.v)}</b></li>`).join("")}</ul></div>`;
+}
+function savChartHtml(){
+  const pts = Object.entries(S.sav.snaps||{}).sort((a,b)=>a[0].localeCompare(b[0])).slice(-90);
+  if (pts.length < 2) return `<div class="empty">Grafik nilai vs modal muncul setelah ada catatan di beberapa hari berbeda.</div>`;
+  const W = 340, H = 150, L = 4, R = 4, T = 10, B = 22;
+  const vals = pts.flatMap(([,v])=>[v.value||0, v.cost||0]); let mn = Math.min(...vals), mx = Math.max(...vals);
+  if (mx===mn){ mx += 1; mn -= 1; } const pad = (mx-mn)*0.08; mn -= pad; mx += pad;
+  const x = i => L + i*(W-L-R)/(pts.length-1), y = v => T + (1-(v-mn)/(mx-mn))*(H-T-B);
+  const line = key => pts.map(([,v],i)=>`${i?"L":"M"}${x(i).toFixed(1)} ${y(v[key]||0).toFixed(1)}`).join(" ");
+  const area = `${line("value")} L${x(pts.length-1).toFixed(1)} ${H-B} L${x(0).toFixed(1)} ${H-B} Z`;
+  const d = iso => { const t = new Date(iso+"T00:00:00"); return `${t.getDate()} ${BLN3(t.getMonth())}`; };
+  const last = pts[pts.length-1][1];
+  return `<div class="savchart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Grafik nilai tabungan dibanding modal">
+    <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14B8A6" stop-opacity=".28"/><stop offset="1" stop-color="#14B8A6" stop-opacity="0"/></linearGradient></defs>
+    <line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="#ECEDF6"/>
+    <path d="${area}" fill="url(#sg)"/>
+    <path d="${line("cost")}" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-dasharray="4 4"/>
+    <path d="${line("value")}" fill="none" stroke="#14B8A6" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${x(pts.length-1)}" cy="${y(last.value||0)}" r="4" fill="#14B8A6" stroke="#fff" stroke-width="2"/>
+    <text x="${L}" y="${H-6}" font-size="10" fill="#8B8FA8">${d(pts[0][0])}</text>
+    <text x="${W-R}" y="${H-6}" font-size="10" fill="#8B8FA8" text-anchor="end">${d(pts[pts.length-1][0])}</text>
+  </svg><div class="savlegend"><span><i style="background:#14B8A6"></i>Nilai</span><span><i style="background:#9CA3AF"></i>Modal</span></div></div>`;
+}
+function renderSavings(){
+  const st = savStats();
+  $("savTotal").textContent = rp(st.value);
+  $("savTrend").innerHTML = st.cost>0 ? `${st.gain>=0?"↑":"↓"} ${Math.abs(st.pct).toLocaleString("id-ID",{maximumFractionDigits:2})}% dari modal` : "Belum ada tabungan";
+  $("savCost").textContent = short(st.cost);
+  $("savGain").textContent = (st.gain>0?"+":st.gain<0?"−":"") + short(Math.abs(st.gain));
+  const mg = monthGrowth(st);
+  $("savMonth").textContent = mg==null ? "—" : `${mg>0?"+":""}${mg.toLocaleString("id-ID",{maximumFractionDigits:2})}%`;
+  const newest = Math.max(0, ...Object.values(S.sav.prices||{}).map(p=>p.updated||0));
+  $("savUpdated").textContent = newest ? new Date(newest).toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"}) + (new Date(newest).toDateString()===today.toDateString() ? "" : " · " + new Date(newest).toLocaleDateString("id-ID",{day:"numeric",month:"short"})) : "—";
+  // pie
+  const rows = Object.entries(st.per).filter(([,p])=>p.value>0).map(([k,p])=>{ const a = savAsset(k); return { n:a.name, v:p.value, c:a.color }; }).sort((a,b)=>b.v-a.v);
+  $("savPieMeta").textContent = rows.length ? `${rows.length} aset` : "";
+  $("savPie").innerHTML = rows.length ? ringHtml(rows, st.value, "Total") : `<div class="empty">Belum ada tabungan. Ketuk + Tambah untuk mencatat.</div>`;
+  // growth
+  $("savGrowthMeta").innerHTML = pctChip(st.pct);
+  $("savChart").innerHTML = savChartHtml();
+  // assets
+  $("savAssets").innerHTML = savVisible(st).map(a=>{ const p = st.per[a.key];
+    const sub = p && p.qty>0 ? `${fmtQty(p.qty,a)} ${a.unit}${isIdrUnit(a)?"":` · @${short(savPrice(a.key))}`}` : "Belum ada";
+    return `<button type="button" class="cat" data-sav="${esc(a.key)}">${symTile(a)}
+      <span class="mid"><b>${esc(a.name)}</b><small>${sub}</small></span>
+      <span style="display:grid;justify-items:end;gap:3px"><b style="font-size:13.5px">${p&&p.value?short(p.value):"—"}</b>${p && p.cost>0 ? pctChip(p.pct) : ""}</span></button>`; }).join("");
+  // calendar
+  $("savCalToggle").setAttribute("aria-expanded", savCalOpen);
+  const mtx = S.sav.tx.filter(t=>t.month===ym);
+  const net = mtx.reduce((a,t)=>a + (t.kind==="wd" ? -(t.idr||0) : (t.idr||0)), 0);
+  $("savCalMeta").textContent = mtx.length ? `${mtx.length} catatan · ${net>=0?"+":"−"}${short(Math.abs(net))}` : "";
+  $("savCal").hidden = !savCalOpen;
+  if (savCalOpen){
+    const byDay = {}; mtx.forEach(t=>{ const d = byDay[t.date] || (byDay[t.date] = { add:0, wd:0 }); if (t.kind==="wd") d.wd += t.idr||0; else d.add += t.idr||0; });
+    let grid = ["Sen","Sel","Rab","Kam","Jum","Sab","Min"].map((h,i)=>`<div class="dow${i===6?" sun":""}">${h}</div>`).join("");
+    weeksOf(ym).forEach(w=>w.isos.forEach((iso,i)=>{
+      const d = +iso.slice(8,10), out = iso.slice(0,7)!==ym, x = byDay[iso];
+      const netd = x ? x.add - x.wd : 0;
+      const bg = x ? `background:color-mix(in srgb,${netd>=0?"var(--green)":"var(--red)"} 16%,#fff)` : "";
+      grid += `<button type="button" class="day${i===6?" sun":""}${iso===todayISO?" today":""}${out?" out":""}" data-savday="${iso}" style="${bg}">
+        <span class="n">${d}</span><span class="v" style="color:${netd>=0?"var(--green)":"var(--red)"}">${x?(netd>=0?"+":"−")+short(Math.abs(netd)).replace(" ",""):""}</span><span class="dots"></span></button>`;
+    }));
+    $("savCal").innerHTML = `<div class="cal">${grid}</div>`;
+  }
+  // history
+  const hist = [...S.sav.tx].sort((a,b)=>b.date.localeCompare(a.date)||(b.created||0)-(a.created||0)).slice(0,12);
+  $("savHist").innerHTML = hist.length ? hist.map(savTxRow).join("") : `<li class="empty">Belum ada catatan.</li>`;
+  ["savAdd","savWd","savNewAsset"].forEach(id=>{ $(id).hidden = !canWrite; });
+  savAutoRefresh();
+  maybeSnapshot(st);
+}
+const SAV_KIND = { add:"Tambah", wd:"Tarik", yield:"Imbal hasil" };
+function savTxRow(t){
+  const a = savAsset(t.asset), dt = new Date(t.date+"T00:00:00");
+  return `<li class="row">${symTile(a,true)}<button type="button" class="nm" data-savtx="${esc(t.id)}"><b>${SAV_KIND[t.kind]||""} ${esc(a.name)}</b><small>${fmtQty(t.qty,a)} ${a.unit} · ${dt.getDate()} ${BLN3(dt.getMonth())} ${dt.getFullYear()}${t.note?" · "+esc(t.note):""}</small></button>
+    <div class="right"><span class="amt ${t.kind==="wd"?"exp":"inc"}">${t.kind==="wd"?"−":"+"}${short(t.idr||0)}</span>${canWrite?`<button type="button" class="del" data-savdel="${esc(t.id)}" aria-label="Hapus">${ico("trash")}</button>`:""}</div></li>`;
+}
+async function saveSavTx(id, data){
+  if (mode==="cloud") await write((id ? col("savTx").doc(id) : col("savTx").doc()).set(data));
+  else { if (id) S.sav.tx = S.sav.tx.map(t=>t.id===id?{id,...data}:t); else S.sav.tx.push({ id:"s"+Date.now(), ...data }); render(); }
+}
+async function delSavTx(id){ if (mode==="cloud") await write(col("savTx").doc(id).delete()); else { S.sav.tx = S.sav.tx.filter(t=>t.id!==id); render(); } }
+async function setSavPrice(k, price, manual){
+  const v = { price, updated: Date.now(), manual: !!manual };
+  if (mode==="cloud") await write(dref("savPrices/"+k).set(v)); else { S.sav.prices[k] = v; render(); }
+}
+function openSavTx(kind, key, existing){
+  const st = savStats();
+  let k = existing ? existing.type : kind || "add";
+  if (existing) k = existing.kind;
+  let asset = existing ? existing.asset : key || (savVisible(st)[0]||SAV_PRESETS[0]).key;
+  let idrTouched = !!existing;
+  const chips = () => savVisible(st).map(a=>`<button type="button" data-pick="${esc(a.key)}" aria-pressed="${a.key===asset}">${symTile(a,true)}${esc(a.name)}</button>`).join("");
+  openSheet(existing ? "Ubah catatan" : "Catat tabungan", `
+    <div class="seg three" role="group" aria-label="Jenis">
+      <button type="button" data-k="add" aria-pressed="${k==="add"}">Tambah</button>
+      <button type="button" data-k="wd" aria-pressed="${k==="wd"}">Tarik</button>
+      <button type="button" data-k="yield" aria-pressed="${k==="yield"}">Imbal hasil</button>
+    </div>
+    <div class="assetchips" id="sChips">${chips()}</div>
+    <div class="field" id="sQtyF"><label for="sQty" id="sQtyL"></label><input id="sQty" inputmode="decimal" autocomplete="off" placeholder="0" value="${existing?esc(String(existing.qty).replace(".",",")):""}"><div class="hint" id="sQtyH" style="text-align:left"></div></div>
+    ${amountField("sIdr","Total (Rp)", existing?String(existing.idr||""):"")}
+    <div class="twocol">
+      <div class="field"><label for="sDate">Tanggal</label><input type="date" id="sDate" value="${existing?existing.date:(ym===ymOf(today)?todayISO:`${ym}-01`)}"></div>
+      <div class="field"><label for="sNote">Catatan</label><input id="sNote" maxlength="60" value="${existing?esc(existing.note||""):""}" placeholder="mis. Antam 5 gr"></div>
+    </div>
+    <div class="actions"><button type="submit" class="btn primary">Simpan</button>${existing?`<button type="button" class="btn danger" id="sDel">Hapus catatan</button>`:""}</div>`,
+  async ()=>{
+    const a = savAsset(asset), idrU = isIdrUnit(a);
+    let idr = parseAmt($("sIdr").value) || 0;
+    let qty = idrU ? idr : parseQty($("sQty").value);
+    if (!qty){ toast(idrU ? "Isi jumlah rupiah dulu" : `Isi jumlah ${a.unit} dulu`); (idrU?$("sIdr"):$("sQty")).focus(); return false; }
+    if (!idr && !idrU){ const pr = savPrice(asset); idr = Math.round(qty*pr); }
+    if (k==="wd"){ const have = (st.per[asset]||{}).qty||0, back = existing && existing.kind==="wd" ? existing.qty : 0;
+      if (qty > have + back + 1e-9){ toast(`Melebihi saldo: ${fmtQty(have+back,a)} ${a.unit}`); return false; } }
+    if (k==="add" && !idr){ toast("Isi total rupiah (modal)"); $("sIdr").focus(); return false; }
+    const date = $("sDate").value || todayISO;
+    await saveSavTx(existing ? existing.id : null, { asset, kind:k, qty, idr, date, month: date.slice(0,7), note: $("sNote").value.trim(), created: existing?.created || Date.now() });
+    toast(k==="wd" ? "Penarikan dicatat" : k==="yield" ? "Imbal hasil dicatat" : "Tabungan ditambahkan");
+  }, null);
+  wireAmount("sIdr");
+  const sync = ()=>{
+    const a = savAsset(asset), idrU = isIdrUnit(a);
+    $("sQtyF").hidden = idrU;
+    $("sQtyL").textContent = `Jumlah (${a.unit})`;
+    const pr = savPrice(asset), q = parseQty($("sQty").value);
+    $("sQtyH").textContent = idrU ? "" : (pr ? `Harga sekarang ${rp(pr)}/${a.unit}` : "Harga belum ada, isi total rupiah");
+    if (!idrU && !idrTouched && q && pr){ $("sIdr").value = short(Math.round(q*pr)).replace(" ",""); $("sIdr").dispatchEvent(new Event("input")); }
+    const lab = sheet.querySelector('label[for="sIdr"]'); if (lab) lab.textContent = k==="add" ? "Modal / total dibayar (Rp)" : k==="wd" ? "Diterima (Rp)" : "Nilai (Rp)";
+    const have = (st.per[asset]||{}).qty||0;
+    if (k==="wd" && !idrU) $("sQtyH").textContent += ` · saldo ${fmtQty(have,a)} ${a.unit}`;
+  };
+  sheet.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{ k = b.dataset.k; sheet.querySelectorAll("[data-k]").forEach(x=>x.setAttribute("aria-pressed", x===b)); sync(); });
+  $("sChips").addEventListener("click", e=>{ const b = e.target.closest("[data-pick]"); if (!b) return; asset = b.dataset.pick; idrTouched = false;
+    $("sChips").querySelectorAll("[data-pick]").forEach(x=>x.setAttribute("aria-pressed", x===b)); sync(); });
+  $("sQty").addEventListener("input", sync);
+  $("sIdr").addEventListener("input", e=>{ if (e.isTrusted) idrTouched = true; });
+  const on = $("sChips").querySelector('[aria-pressed="true"]'); if (on) on.scrollIntoView({ inline:"center", block:"nearest" });
+  sync();
+  if (existing){ const d = $("sDel"); d.onclick = async()=>{ if (!(await askDelete("Hapus catatan?", `${eB(SAV_KIND[existing.kind]+" "+savAsset(existing.asset).name)} sebesar ${eB(rp(existing.idr||0))} akan dihapus.`))) return;
+    try { await delSavTx(existing.id); closeSheet(); toast("Catatan dihapus"); } catch(e){ fail(e); } }; }
+}
+function openSavAsset(key){
+  const st = savStats(), a = savAsset(key), p = st.per[key] || { qty:0, cost:0, value:0, gain:0, pct:null, realized:0, yieldIdr:0, txs:[] };
+  const pr = savPrice(key), pinfo = S.sav.prices[key];
+  const hist = [...(p.txs||[])].reverse().map(savTxRow).join("");
+  openSheet(esc(a.name), `
+    <div class="phead">${symTile(a)}<div style="min-width:0"><b>${esc(a.name)}</b><small>${isIdrUnit(a) ? "Rupiah" : `${rp(pr)}/${a.unit}${pinfo?(pinfo.manual?" · manual":" · otomatis"):""}`}</small></div><span style="margin-left:auto">${p.cost>0?pctChip(p.pct):""}</span></div>
+    <div class="pstats">
+      <div class="stat"><small>Dimiliki</small><b>${fmtQty(p.qty,a)} ${a.unit}</b></div>
+      <div class="stat"><small>Nilai sekarang</small><b>${rp(p.value)}</b></div>
+      <div class="stat"><small>Modal</small><b>${rp(p.cost)}</b></div>
+      <div class="stat"><small>Untung / rugi</small><b class="${p.gain>0?"down":p.gain<0?"up":""}">${signRp(p.gain)}</b></div>
+      ${p.realized ? `<div class="stat"><small>Untung terealisasi</small><b class="${p.realized>0?"down":"up"}">${signRp(p.realized)}</b></div>` : ""}
+      ${p.qty>0 && !isIdrUnit(a) ? `<div class="stat"><small>Harga rata-rata</small><b>${rp(p.cost/p.qty)}</b></div>` : ""}
+    </div>
+    ${canWrite?`<div class="pbtns"><button type="button" class="btn primary" id="aAdd">+ Tambah</button><button type="button" class="btn ghost" id="aWd">Tarik</button></div>
+    <div class="actions">${isIdrUnit(a)?"":`<button type="button" class="btn ghost" id="aPrice">Ubah harga</button>`}<button type="button" class="btn ghost" id="aYield">+ Imbal hasil</button>${a.custom?`<button type="button" class="btn danger" id="aDel">Hapus aset</button>`:""}</div>`:""}
+    <div class="daysec">Riwayat</div>
+    <ul class="list">${hist || `<li class="empty">Belum ada catatan.</li>`}</ul>`, null);
+  wireSavRows(sheet);
+  if (!canWrite) return;
+  $("aAdd").onclick = ()=>openSavTx("add", key); $("aWd").onclick = ()=>openSavTx("wd", key); $("aYield").onclick = ()=>openSavTx("yield", key);
+  if ($("aPrice")) $("aPrice").onclick = ()=>openSavPrice(key);
+  if ($("aDel")) $("aDel").onclick = async ()=>{
+    if ((p.txs||[]).length) return toast("Hapus semua catatan aset ini dulu.");
+    if (!(await askDelete("Hapus aset?", `${eB(a.name)} akan dihapus dari daftar.`))) return;
+    try { if (mode==="cloud") await write(col("savAssets").doc(a.id).delete()); else { S.sav.assets = S.sav.assets.filter(x=>x.id!==a.id); render(); } closeSheet(); } catch(e){ fail(e); } };
+}
+function openSavPrice(key){
+  const a = savAsset(key), cur = S.sav.prices[key];
+  let manual = a.src==="manual" ? true : !!(cur && cur.manual);
+  openSheet(`Harga ${esc(a.name)}`, `
+    ${a.src!=="manual" ? `<div class="seg two" role="group"><button type="button" id="pmAuto" aria-pressed="${!manual}">Otomatis</button><button type="button" id="pmMan" aria-pressed="${manual}">Manual</button></div>` : ""}
+    ${amountField("pVal", `Harga per ${a.unit} (Rp)`, String(Math.round(savPrice(key))||""))}
+    <div class="actions"><button type="submit" class="btn primary">Simpan</button></div>`,
+  async ()=>{
+    if (!manual){ await setSavPrice(key, savPrice(key), false); closeSheet(); refreshSavPrices(true); return false; }
+    const n = parseAmt($("pVal").value); if (!n){ $("pVal").focus(); return false; }
+    await setSavPrice(key, n, true); toast("Harga disimpan");
+  }, null);
+  wireAmount("pVal");
+  if ($("pmAuto")){ const setM = m=>{ manual = m; $("pmAuto").setAttribute("aria-pressed", !m); $("pmMan").setAttribute("aria-pressed", m); $("pVal").disabled = !m; };
+    $("pmAuto").onclick = ()=>setM(false); $("pmMan").onclick = ()=>setM(true); setM(manual); }
+}
+function openSavNewAsset(){
+  const shown = new Set([...SAV_DEFAULT, ...((S.settings.savShown)||[])]);
+  const extra = SAV_PRESETS.filter(a=>!shown.has(a.key));
+  let color = SAV_COLORS[(S.sav.assets.length+4) % SAV_COLORS.length];
+  openSheet("Tambah aset", `
+    ${extra.length ? `<div class="daysec">Pilihan</div><div style="display:grid">${extra.map(a=>`<button type="button" class="set" data-addpreset="${a.key}">${symTile(a)}<span><b>${esc(a.name)}</b><small>${a.unit}${a.src==="manual"?" · harga manual":a.src==="idr"?"":" · harga otomatis"}</small></span>${ico("plus")}</button>`).join("")}</div>` : ""}
+    <div class="daysec">Aset lain</div>
+    <div class="field"><label for="naName">Nama</label><input id="naName" maxlength="24" placeholder="mis. Obligasi ORI"></div>
+    <div class="twocol"><div class="field"><label for="naUnit">Satuan</label><input id="naUnit" maxlength="10" placeholder="unit"></div>
+      <div class="field"><label for="naSym">Simbol</label><input id="naSym" maxlength="3" placeholder="OR"></div></div>
+    <div class="colorchips" id="naColors">${SAV_COLORS.map(c=>`<button type="button" style="--c:${c}" data-c="${c}" aria-pressed="${c===color}" aria-label="Warna"></button>`).join("")}</div>
+    <div class="actions"><button type="submit" class="btn primary">Tambah aset</button></div>`,
+  async ()=>{
+    const name = $("naName").value.trim(); if (!name){ $("naName").focus(); return false; }
+    const body = { name, unit: $("naUnit").value.trim() || "unit", sym: $("naSym").value.trim() || name.slice(0,2), color, created: Date.now() };
+    if (mode==="cloud") await write(col("savAssets").doc().set(body)); else { S.sav.assets.push({ id:"a"+Date.now(), ...body }); render(); }
+    toast("Aset ditambahkan");
+  }, null);
+  $("naColors").addEventListener("click", e=>{ const b = e.target.closest("[data-c]"); if (!b) return; color = b.dataset.c; $("naColors").querySelectorAll("[data-c]").forEach(x=>x.setAttribute("aria-pressed", x===b)); });
+  sheet.querySelectorAll("[data-addpreset]").forEach(b=>b.onclick=async()=>{ await saveSettings({ savShown: [...new Set([...((S.settings.savShown)||[]), b.dataset.addpreset])] }); closeSheet(); toast("Aset ditambahkan"); });
+}
+function openSavDay(iso){
+  const txs = S.sav.tx.filter(t=>t.date===iso), dt = new Date(iso+"T00:00:00");
+  openSheet(`${HARI[dt.getDay()]}, ${dt.getDate()} ${BULAN[dt.getMonth()]}`, `
+    <ul class="list">${txs.length ? txs.map(savTxRow).join("") : `<li class="empty">Belum ada catatan.</li>`}</ul>
+    ${canWrite?`<div class="pbtns"><button type="button" class="btn primary" id="dAdd">+ Tambah</button><button type="button" class="btn ghost" id="dWd">Tarik</button></div>`:""}`, null);
+  if (canWrite){ $("dAdd").onclick = ()=>{ openSavTx("add"); $("sDate").value = iso; }; $("dWd").onclick = ()=>{ openSavTx("wd"); $("sDate").value = iso; }; }
+  wireSavRows(sheet);
+}
+function wireSavRows(root){
+  root.querySelectorAll("[data-savtx]").forEach(b=>b.onclick=()=>{ const t = S.sav.tx.find(x=>x.id===b.dataset.savtx); if (t && canWrite) openSavTx(t.kind, t.asset, t); });
+  root.querySelectorAll("[data-savdel]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); confirmDelSav(b.dataset.savdel); });
+}
+async function confirmDelSav(id){
+  const t = S.sav.tx.find(x=>x.id===id); if (!t) return;
+  if (!(await askDelete("Hapus catatan?", `${eB(SAV_KIND[t.kind]+" "+savAsset(t.asset).name)} sebesar ${eB(rp(t.idr||0))} akan dihapus.`))) return;
+  try { await delSavTx(t.id); toast("Catatan dihapus"); if (!scrim.hidden) closeSheet(); } catch(e){ fail(e); }
+}
+function renderMe(){
+  const u = currentUser, b = $("meBtn"); if (!b) return;
+  const nm = (u && (u.displayName || u.email)) || S.settings.familyName || "K";
+  b.innerHTML = u && u.photoURL ? `<img src="${esc(u.photoURL)}" alt="" referrerpolicy="no-referrer">` : esc(nm.trim()[0]||"K").toUpperCase();
 }
 
 /* ---------- navigation ---------- */
@@ -1881,7 +2272,20 @@ function openName(){
 /* ---------- events ---------- */
 $("prevM").onclick=()=>{ ym = shiftYm(ym,-1); subMonth(); };
 $("nextM").onclick=()=>{ ym = shiftYm(ym,1); subMonth(); };
-$("fab").onclick=()=>openTx();
+$("fab").onclick=()=>{ if (screen==="tabungan") openSavTx("add"); else openTx(); };
+$("meBtn").onclick=()=>go("profil");
+$("savAdd").onclick=()=>openSavTx("add");
+$("savWd").onclick=()=>openSavTx("wd");
+$("savNewAsset").onclick=openSavNewAsset;
+$("savRefresh").onclick=()=>refreshSavPrices(true);
+$("savCalToggle").onclick=()=>{ savCalOpen = !savCalOpen; lsSet("kas-savcal", savCalOpen?"1":"0"); render(); };
+document.addEventListener("click", e=>{
+  if (e.target.closest("#sheet")) return;
+  const a = e.target.closest("[data-sav]"); if (a){ openSavAsset(a.dataset.sav); return; }
+  const d = e.target.closest("[data-savday]"); if (d){ openSavDay(d.dataset.savday); return; }
+  const tx = e.target.closest("[data-savtx]"); if (tx){ const t = S.sav.tx.find(x=>x.id===tx.dataset.savtx); if (t && canWrite) openSavTx(t.kind, t.asset, t); return; }
+  const del = e.target.closest("[data-savdel]"); if (del){ confirmDelSav(del.dataset.savdel); }
+});
 $("addBill").onclick=()=>openBill();
 $("addPlan").onclick=()=>openPlanEdit();
 $("setGroc").onclick=openGroc; $("setGroc2").onclick=openGroc;
@@ -2072,6 +2476,10 @@ let started = false, rootUnsubs = [], famListOff = null, selfSynced = false;
 function startData(){
   if (started || !FID) return; started = true;
   mode = "cloud"; selfSynced = false;
+  rootUnsubs.push(col("savAssets").onSnapshot(s=>{ S.sav.assets = s.docs.map(d=>({ id:d.id, ...d.data() })); if (screen==="tabungan") render(); }, onDbErr));
+  rootUnsubs.push(col("savTx").onSnapshot(s=>{ S.sav.tx = s.docs.map(d=>({ id:d.id, ...d.data() })); if (screen==="tabungan") render(); }, onDbErr));
+  rootUnsubs.push(col("savPrices").onSnapshot(s=>{ S.sav.prices = Object.fromEntries(s.docs.map(d=>[d.id, d.data()])); if (screen==="tabungan") render(); }, onDbErr));
+  rootUnsubs.push(col("savSnaps").onSnapshot(s=>{ S.sav.snaps = Object.fromEntries(s.docs.map(d=>[d.id, d.data()])); if (screen==="tabungan") render(); }, onDbErr));
   rootUnsubs.push(col("bills").onSnapshot(s=>{ S.bills = s.docs.map(d=>({id:d.id,...d.data()})).sort(sortBills); render(); }, onDbErr));
   rootUnsubs.push(dref("settings/main").onSnapshot(s=>{ S.settings = s.exists ? s.data() : {}; render(); }, onDbErr));
   rootUnsubs.push(docRef(famPath("meta")).onSnapshot(s=>{ S.family.meta = s.data(); S.famNames[FID] = S.family.meta.name || S.famNames[FID]; render(); }, onDbErr));
@@ -2104,7 +2512,7 @@ function startData(){
 }
 function stopData(){
   rootUnsubs.forEach(u=>u()); rootUnsubs = []; unsubs.forEach(u=>u()); unsubs = []; started = false;
-  Object.assign(S, { bills:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[], family:{ meta:{}, members:{} } });
+  Object.assign(S, { bills:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[], family:{ meta:{}, members:{} }, sav:{ assets:[], tx:[], prices:{}, snaps:{} } });
 }
 function openFamily(fid){
   if (fid === FID && started) return;
@@ -2183,7 +2591,7 @@ function syncLabel(){
 }
 
 const h0 = (location.hash||"").slice(1);
-go(["beranda","transaksi","anggaran","profil"].includes(h0) ? h0 : "beranda");
+go(["beranda","transaksi","anggaran","tabungan","profil"].includes(h0) ? h0 : "beranda");
 (function boot(){
   const cfg = window.FIREBASE_CONFIG;
   if (!window.firebase || !cfg || !cfg.apiKey || /^ISI/.test(cfg.apiKey)){
@@ -2212,7 +2620,7 @@ go(["beranda","transaksi","anggaran","profil"].includes(h0) ? h0 : "beranda");
 })();
 
 /* ---------- export / import ---------- */
-const COLLS = ["bills","settings","months","tx"];
+const COLLS = ["bills","settings","months","tx","savAssets","savTx","savPrices","savSnaps"];
 $("exportBtn").onclick = async ()=>{
   if (mode!=="cloud") return toast("Buka keluarga dulu untuk ekspor data.");
   try {
@@ -2234,7 +2642,7 @@ $("importFile").onchange = async e=>{
   const ALL = [...COLLS, "plans", "plantx"];
   const counts = ALL.map(c=>[c, Object.keys(data[c]||{}).length]).filter(r=>r[1]);
   const total = counts.reduce((a,r)=>a+r[1],0); if (!total) return toast("File cadangan kosong.");
-  const names = { bills:"tagihan", settings:"pengaturan", months:"data bulan", tx:"transaksi", plans:"rencana", plantx:"catatan rencana" };
+  const names = { bills:"tagihan", settings:"pengaturan", months:"data bulan", tx:"transaksi", plans:"rencana", plantx:"catatan rencana", savAssets:"aset tabungan", savTx:"catatan tabungan", savPrices:"harga", savSnaps:"riwayat nilai" };
   if (!(await askDelete("Impor data?", `${counts.map(([c,n])=>`${eB(n)} ${names[c]}`).join(", ")} akan ditambahkan ke ${eB(S.famNames[FID]||"keluarga ini")}.`, "Impor", "primary"))) return;
   try {
     const upd = {};
