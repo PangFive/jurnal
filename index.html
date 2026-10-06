@@ -1379,7 +1379,8 @@ const savAll = () => [...SAV_PRESETS, ...savCustom()];
 const savAsset = k => savAll().find(a=>a.key===k) || { key:k, name:k, unit:"unit", sym:"?", color:"#64748B", src:"manual", dec:4 };
 const isIdrUnit = a => a.src==="idr";
 function savVisible(st){
-  const shown = new Set([...SAV_DEFAULT, ...((S.settings.savShown)||[]), ...Object.keys(st.per)]);
+  const hidden = new Set((S.settings.savHidden)||[]);
+  const shown = new Set([...SAV_DEFAULT.filter(k=>!hidden.has(k)), ...((S.settings.savShown)||[]), ...Object.keys(st.per)]);
   return savAll().filter(a=>shown.has(a.key) || a.custom);
 }
 const symTile = (a, sm) => `<span class="ic solid sym${sm?" sm":""}" style="--c:${a.color}">${esc(a.sym)}</span>`;
@@ -1617,17 +1618,35 @@ function openSavAsset(key){
       ${p.qty>0 && !isIdrUnit(a) ? `<div class="stat"><small>Harga rata-rata</small><b>${rp(p.cost/p.qty)}</b></div>` : ""}
     </div>
     ${canWrite?`<div class="pbtns"><button type="button" class="btn primary" id="aAdd">+ Tambah</button><button type="button" class="btn ghost" id="aWd">Tarik</button></div>
-    <div class="actions">${isIdrUnit(a)?"":`<button type="button" class="btn ghost" id="aPrice">Ubah harga</button>`}<button type="button" class="btn ghost" id="aYield">+ Imbal hasil</button>${a.custom?`<button type="button" class="btn danger" id="aDel">Hapus aset</button>`:""}</div>`:""}
+    <div class="actions">${isIdrUnit(a)?"":`<button type="button" class="btn ghost" id="aPrice">Ubah harga</button>`}<button type="button" class="btn ghost" id="aYield">+ Imbal hasil</button><button type="button" class="btn danger" id="aDel">Hapus aset</button></div>`:""}
     <div class="daysec">Riwayat</div>
     <ul class="list">${hist || `<li class="empty">Belum ada catatan.</li>`}</ul>`, null);
   wireSavRows(sheet);
   if (!canWrite) return;
   $("aAdd").onclick = ()=>openSavTx("add", key); $("aWd").onclick = ()=>openSavTx("wd", key); $("aYield").onclick = ()=>openSavTx("yield", key);
   if ($("aPrice")) $("aPrice").onclick = ()=>openSavPrice(key);
-  if ($("aDel")) $("aDel").onclick = async ()=>{
-    if ((p.txs||[]).length) return toast("Hapus semua catatan aset ini dulu.");
-    if (!(await askDelete("Hapus aset?", `${eB(a.name)} akan dihapus dari daftar.`))) return;
-    try { if (mode==="cloud") await write(col("savAssets").doc(a.id).delete()); else { S.sav.assets = S.sav.assets.filter(x=>x.id!==a.id); render(); } closeSheet(); } catch(e){ fail(e); } };
+  $("aDel").onclick = ()=>removeSavAsset(key);
+}
+async function removeSavAsset(key){
+  const a = savAsset(key), txs = S.sav.tx.filter(t=>t.asset===key);
+  const msg = txs.length ? `${eB(a.name)} beserta ${eB(txs.length+" catatan")} di dalamnya akan dihapus permanen.` : `${eB(a.name)} akan dihapus dari daftar aset.`;
+  if (!(await askDelete("Hapus aset?", msg, "Hapus aset"))) return;
+  const shown = ((S.settings.savShown)||[]).filter(k=>k!==key);
+  const hidden = SAV_DEFAULT.includes(key) ? [...new Set([...((S.settings.savHidden)||[]), key])] : ((S.settings.savHidden)||[]);
+  try {
+    if (mode==="cloud"){
+      const upd = {};
+      txs.forEach(t=>{ upd[ROOT+"/savTx/"+t.id] = null; });
+      if (a.custom) upd[ROOT+"/savAssets/"+a.id] = null;
+      upd[ROOT+"/settings/main/savShown"] = shown.length ? shown : null;
+      upd[ROOT+"/settings/main/savHidden"] = hidden.length ? hidden : null;
+      await write(rdb.ref().update(upd));
+    } else {
+      S.sav.tx = S.sav.tx.filter(t=>t.asset!==key); if (a.custom) S.sav.assets = S.sav.assets.filter(x=>x.id!==a.id);
+      S.settings = { ...S.settings, savShown: shown, savHidden: hidden }; render();
+    }
+    closeSheet(); toast(`${a.name} dihapus`);
+  } catch(e){ fail(e); }
 }
 function openSavPrice(key){
   const a = savAsset(key), cur = S.sav.prices[key];
@@ -1646,8 +1665,8 @@ function openSavPrice(key){
     $("pmAuto").onclick = ()=>setM(false); $("pmMan").onclick = ()=>setM(true); setM(manual); }
 }
 function openSavNewAsset(){
-  const shown = new Set([...SAV_DEFAULT, ...((S.settings.savShown)||[])]);
-  const extra = SAV_PRESETS.filter(a=>!shown.has(a.key));
+  const vis = new Set(savVisible(savStats()).map(a=>a.key));
+  const extra = SAV_PRESETS.filter(a=>!vis.has(a.key));
   let color = SAV_COLORS[(S.sav.assets.length+4) % SAV_COLORS.length];
   openSheet("Tambah aset", `
     ${extra.length ? `<div class="daysec">Pilihan</div><div style="display:grid">${extra.map(a=>`<button type="button" class="set" data-addpreset="${a.key}">${symTile(a)}<span><b>${esc(a.name)}</b><small>${a.unit}${a.src==="manual"?" · harga manual":a.src==="idr"?"":" · harga otomatis"}</small></span>${ico("plus")}</button>`).join("")}</div>` : ""}
@@ -1664,7 +1683,8 @@ function openSavNewAsset(){
     toast("Aset ditambahkan");
   }, null);
   $("naColors").addEventListener("click", e=>{ const b = e.target.closest("[data-c]"); if (!b) return; color = b.dataset.c; $("naColors").querySelectorAll("[data-c]").forEach(x=>x.setAttribute("aria-pressed", x===b)); });
-  sheet.querySelectorAll("[data-addpreset]").forEach(b=>b.onclick=async()=>{ await saveSettings({ savShown: [...new Set([...((S.settings.savShown)||[]), b.dataset.addpreset])] }); closeSheet(); toast("Aset ditambahkan"); });
+  sheet.querySelectorAll("[data-addpreset]").forEach(b=>b.onclick=async()=>{ const k = b.dataset.addpreset;
+    await saveSettings({ savShown: [...new Set([...((S.settings.savShown)||[]), k])], savHidden: ((S.settings.savHidden)||[]).filter(x=>x!==k) }); closeSheet(); toast("Aset ditambahkan"); });
 }
 function openSavDay(iso){
   const txs = S.sav.tx.filter(t=>t.date===iso), dt = new Date(iso+"T00:00:00");
