@@ -513,6 +513,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
       <div class="sec-h"><h2>Pemasukan</h2></div>
       <div class="card" style="gap:0">
         <button class="set" id="setIncomeDefault"><span class="ic solid" style="--c:var(--green)">ICON_WALLET</span><span><b>Pemasukan rutin</b></span><span class="val" id="valIncomeDefault">—</span></button>
+        <button class="set" id="setPayday"><span class="ic solid" style="--c:var(--blue)">ICON_CAL</span><span><b>Tanggal gajian</b></span><span class="val" id="valPayday">—</span></button>
         <button class="set" id="setIncomeMonth"><span class="ic solid" style="--c:var(--teal)">ICON_CAL</span><span><b><span id="lblIncomeMonth"></span></b><small id="subIncomeMonth"></small></span><span class="val" id="valIncomeMonth">—</span></button>
       </div>
     </section>
@@ -962,8 +963,13 @@ function dayData(iso, c){
   return { exp, inc, paidBills, dues, total };
 }
 /* every money movement this month as one list: transactions + bill payments */
+const payday = () => Math.min(Math.max(parseInt(S.settings.payday,10)||1, 1), monthInfo(ym).days);
 function entries(c, withPlans){
-  const list = S.tx.map(t=>({kind:"tx", id:t.id, date:t.date, created:t.created||0, type:t.type==="inc"?"inc":"exp", amount:t.amount, title:t.note||t.category, sub:t.note?t.category:(t.type==="inc"?"Pemasukan":"Pengeluaran"), category:t.category}));
+  const list = [];
+  const base = incomeBase();
+  if (base > 0) list.push({ kind:"income", id:"main", date:`${ym}-${pad(payday())}`, created:-1, type:"inc", amount:base, category:"Gaji",
+    title: S.month.income!=null ? "Pemasukan bulan ini" : "Pemasukan rutin", sub: "Gaji · pemasukan utama" });
+  list.push(...S.tx.map(t=>({kind:"tx", id:t.id, date:t.date, created:t.created||0, type:t.type==="inc"?"inc":"exp", amount:t.amount, title:t.note||t.category, sub:t.note?t.category:(t.type==="inc"?"Pemasukan":"Pengeluaran"), category:t.category})));
   S.bills.forEach(b=>{ const v = c.paid[b.id]; if (v==null) return;
     const diff = realOf(v)-b.amount;
     list.push({kind:"bill", id:b.id, date:paidDateOf(v)||`${ym}-01`, created:0, type:"exp", amount:realOf(v), title:b.name,
@@ -1238,6 +1244,7 @@ function renderProfile(c){
   $("profName").textContent = name;
   $("profAvatar").textContent = (name.replace(/^keluarga\s*/i,"")[0] || name[0] || "K").toUpperCase();
   $("valIncomeDefault").textContent = S.settings.income ? short(S.settings.income) : "Atur";
+  $("valPayday").textContent = S.settings.payday ? `Tgl ${S.settings.payday}` : "Tgl 1";
   $("lblIncomeMonth").textContent = c.info.label;
   $("valIncomeMonth").textContent = incomeBase() ? short(incomeBase()) : "Atur";
   $("subIncomeMonth").textContent = S.month.income!=null ? "Khusus bulan ini" : "";
@@ -1798,6 +1805,13 @@ const openIncomeMonth = () => openAmountSetting(`Pemasukan ${monthInfo(ym).label
   incomeBase(), null, async n=>{ await saveMonth({...S.month, income:n}); toast("Pemasukan bulan ini disimpan"); },
   S.month.income!=null && S.settings.income ? "Kembali ke pemasukan rutin" : null,
   async()=>{ const m={...S.month}; delete m.income; await saveMonth(m); toast("Mengikuti pemasukan rutin"); });
+function openPayday(){
+  openSheet("Tanggal gajian", `
+    <div class="field"><label for="pdDay">Tanggal (1–31)</label><input id="pdDay" type="number" min="1" max="31" inputmode="numeric" value="${esc(S.settings.payday||1)}"></div>
+    <div class="actions"><button type="submit" class="btn primary">Simpan</button></div>`,
+  async ()=>{ const d = parseInt($("pdDay").value,10); if (!(d>=1 && d<=31)){ $("pdDay").focus(); return false; }
+    await saveSettings({ payday: d }); toast("Tanggal gajian disimpan"); }, "pdDay");
+}
 const openIncomeDefault = () => openAmountSetting("Pemasukan rutin per bulan",
   "Dipakai otomatis untuk setiap bulan, kecuali bulan yang Anda ubah sendiri.",
   S.settings.income, null, async n=>{ await saveSettings({income:n}); toast("Pemasukan rutin disimpan"); });
@@ -1834,6 +1848,7 @@ $("setGroc").onclick=openGroc; $("setGroc2").onclick=openGroc;
 $("incomeBtn").onclick=()=>{ if (canWrite) openIncomeMonth(); };
 $("setIncomeMonth").onclick=openIncomeMonth;
 $("setIncomeDefault").onclick=openIncomeDefault;
+$("setPayday").onclick=openPayday;
 $("addCatBudget").onclick=()=>openCatBudget(); $("addCatBudget2").onclick=()=>openCatBudget();
 $("setName").onclick=openName;
 $("ovPeriod").addEventListener("change", e=>{ ovPeriod = e.target.value; render(); });
@@ -1857,10 +1872,15 @@ document.addEventListener("click", async e=>{
     if (a==="bills") go("anggaran","tagihan"); else if (a==="groc") openGroc(); else openCatBudget(cat.dataset.cat); return; }
   const en = e.target.closest("[data-entry]");
   if (en){ const [k,id] = en.dataset.entry.split(/:(.*)/s);
+    if (k==="income"){ if (canWrite) openIncomeMonth(); return; }
     if (k==="plan"){ const t=S.planTx.find(x=>x.id===id); if (t && canWrite) openPlanTx(t.planId, t.type, t); return; }
     if (k==="bill"){ if (canWrite) openPay(id); } else { const t=S.txAll.find(x=>x.id===id); if (t && canWrite) openTx({}, t); } return; }
   const del = e.target.closest("[data-delentry]");
   if (del){ const [k,id] = del.dataset.delentry.split(/:(.*)/s);
+    if (k==="income"){
+      if (!(await askDelete("Hapus pemasukan bulan ini?", `Pemasukan ${eB(monthInfo(ym).label)} jadi ${eB("Rp 0")}. Pemasukan rutin bulan lain tidak berubah.`))) return;
+      try { await saveMonth({ ...S.month, income: 0 }); toast("Pemasukan bulan ini dihapus"); } catch(err){ fail(err); }
+      return; }
     const t = k==="bill" ? null : (k==="plan" ? S.planTx : S.txAll).find(x=>x.id===id), bl = k==="bill" ? S.bills.find(x=>x.id===id) : null;
     const ok = k==="bill"
       ? await askDelete("Hapus pembayaran?", `Pembayaran ${eB(bl?bl.name:"tagihan")} dihapus dan tagihan kembali ${eB("belum lunas")}.`)
