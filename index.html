@@ -47,7 +47,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .app{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:0 120px}
 
 /* top bar */
-.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:14px 10px;
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding-block:14px 10px;
   background:linear-gradient(var(--bg) 70%, transparent)}
 .tt small{display:block;color:var(--muted);font-size:12.5px;font-weight:500}
 .tt h1{font-size:19px;font-weight:700;letter-spacing:-.01em}
@@ -393,6 +393,11 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .chk[aria-checked="true"] .box{background:var(--primary);border-color:var(--primary)}
 .famopt{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 2px;border:0;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left}
 
+/* personal / family switch */
+.seg.spacesw{width:100%;padding:3px}
+.seg.spacesw button{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 6px;font-size:12.5px}
+.seg.spacesw svg{width:16px;height:16px}
+
 /* login */
 .login{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:24px 16px;
   background:radial-gradient(700px 420px at 10% -10%, #E2E4FF 0, transparent 60%), radial-gradient(600px 420px at 100% 0%, #EFE6FF 0, transparent 55%), var(--bg)}
@@ -417,6 +422,10 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
       <button id="prevM" aria-label="Bulan sebelumnya"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
       <span id="monthLbl"></span>
       <button id="nextM" aria-label="Bulan berikutnya"><svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="seg two spacesw" id="spaceSw" role="group" aria-label="Ruang" hidden>
+      <button type="button" data-space="personal" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Personal</button>
+      <button type="button" data-space="family" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></svg>Keluarga</button>
     </div>
   </header>
   <div class="notice" id="notice" hidden></div>
@@ -584,6 +593,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
     <div class="field" style="width:100%;text-align:left"><label for="obName">Nama keluarga</label><input id="obName" maxlength="30" placeholder="mis. WHY Family"></div>
     <button type="submit" class="btn primary" id="obCreate">Buat keluarga</button>
     <div class="login-msg" id="obMsg"></div>
+    <button type="button" class="btn ghost" id="obPersonal">Pakai Personal saja</button>
     <button type="button" class="linkbtn" id="obOut">Masuk dengan akun lain</button>
   </form>
 </div>
@@ -1616,7 +1626,7 @@ function openPlan(id){
     `<div class="advice">Kurang <b>${rp(st.budget-st.saved)}</b></div>`;
   openSheet("Rencana khusus", `
     <div class="phead">${planIcon(p,true)}<div style="min-width:0"><b>${esc(p.name)}</b><small>${w.range}</small></div><span style="margin-left:auto">${w.tag}</span></div>
-    <div class="access">${Object.keys(p.members||{}).map(ek=>`<span class="achip">${memberAvatar((S.family.members||{})[ek], ek)}${esc(ek===ME?"Anda":memberName(ek).split(" ")[0])}</span>`).join("")}${canWrite?`<button type="button" class="link" id="pAccess">Atur akses</button>`:""}</div>
+    <div class="access">${Object.keys(p.members||{}).map(ek=>`<span class="achip">${memberAvatar((S.family.members||{})[ek], ek)}${esc(ek===ME?"Anda":memberName(ek).split(" ")[0])}</span>`).join("")}${canWrite && !isPersonal()?`<button type="button" class="link" id="pAccess">Atur akses</button>`:""}</div>
     <div class="pstats">
       <div class="stat"><small>Anggaran</small><b>${rp(st.budget)}</b></div>
       <div class="stat"><small>Terkumpul</small><b class="down">${rp(st.saved)}</b></div>
@@ -1638,7 +1648,7 @@ function openPlan(id){
   if (!canWrite) return;
   sheet.querySelectorAll("[data-pitemadd]").forEach(b=>b.onclick=()=>openPlanTx(p.id, "exp", null, { item: b.dataset.pitemadd }));
   $("pSave").onclick = ()=>openPlanTx(p.id, "save");
-  $("pAccess").onclick = ()=>openPlanAccess(p.id);
+  if ($("pAccess")) $("pAccess").onclick = ()=>openPlanAccess(p.id);
   $("pSpend").onclick = ()=>openPlanTx(p.id, "exp");
   $("pEdit").onclick = ()=>openPlanEdit(p.id);
   $("pDone").onclick = async()=>{ try { const {id:_omit, ...body} = p; await savePlan(p.id, {...body, done:!p.done}); toast(p.done?"Rencana aktif lagi":"Rencana ditandai selesai"); setTimeout(()=>openPlan(p.id),150); } catch(e){ fail(e); } };
@@ -1922,6 +1932,8 @@ function memberAvatar(m, ek){
 }
 const memberName = ek => { const m = (S.family.members||{})[ek]; return (m && m.name) || keyEmail(ek); };
 function renderFamily(){
+  $("keluarga").hidden = isPersonal();
+  $("valName").closest(".set").querySelector("b").textContent = isPersonal() ? "Nama" : "Nama keluarga";
   const mem = S.family.members || {};
   const order = { owner:0, admin:1, member:2 };
   const rows = Object.entries(mem).sort((a,b)=>(order[a[1].role]??3)-(order[b[1].role]??3) || keyEmail(a[0]).localeCompare(keyEmail(b[0])));
@@ -2087,24 +2099,55 @@ function stopData(){
 }
 function openFamily(fid){
   if (fid === FID && started) return;
-  stopData(); FID = fid; ROOT = "families/" + fid + "/data"; lsSet("kas-fid", fid);
+  stopData(); FID = fid; ROOT = "families/" + fid + "/data"; if (fid !== S.personalFid) lsSet("kas-fid", fid);
   $("onboard").hidden = true; startData(); syncLabel(); render();
+}
+let space = lsGet("kas-space") === "personal" ? "personal" : "family", famVal = null, creatingPersonal = false;
+const isPersonal = () => !!FID && FID === S.personalFid;
+function applySpace(){
+  if (!famVal) return;
+  document.querySelectorAll("[data-space]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.space===space));
+  $("spaceSw").hidden = false;
+  if (space === "personal"){
+    $("onboard").hidden = true;
+    if (!S.personalFid){ if (!creatingPersonal) createPersonal(); return; }
+    if (FID !== S.personalFid || !started) openFamily(S.personalFid); else render();
+    return;
+  }
+  const ids = S.myFamilies;
+  if (!ids.length){ stopData(); FID = null; ROOT = null; mode = "connecting"; showOnboard(); render(); return; }
+  const pref = lsGet("kas-fid");
+  const pick = ids.includes(FID) ? FID : ids.includes(pref) ? pref : ids[0];
+  if (pick !== FID || !started) openFamily(pick); else render();
+}
+function setSpace(sp){ if (sp === space && started) return; space = sp; lsSet("kas-space", sp); applySpace(); }
+async function createPersonal(){
+  creatingPersonal = true;
+  try {
+    const fid = rdb.ref("families").push().key, u = currentUser;
+    await rdb.ref().update({
+      ["families/"+fid+"/meta"]: { name: "Personal", personal: true, owner: u.uid, ownerEmail: u.email, created: Date.now() },
+      ["families/"+fid+"/members/"+ME]: { email: u.email.toLowerCase(), role: "owner", name: u.displayName || "", photo: u.photoURL || "", addedAt: Date.now() },
+      ["userFamilies/"+ME+"/"+fid]: "p" });
+    await rdb.ref("families/"+fid+"/data/settings/main").set({ familyName: (u.displayName || "Saya").split(" ")[0] });
+  } catch(e){ toast("Gagal membuat ruang personal. Pastikan aturan database terbaru sudah dipasang."); console.warn(e); }
+  finally { creatingPersonal = false; }
 }
 function watchMyFamilies(){
   if (famListOff) famListOff();
   const ref = rdb.ref("userFamilies/" + ME);
   const cb = snap=>{
-    const ids = Object.keys(snap.val()||{});
-    S.myFamilies = ids;
-    ids.forEach(fid=>{ if (!S.famNames[fid]) rdb.ref("families/"+fid+"/meta/name").get().then(s=>{ S.famNames[fid] = s.val() || "Keluarga"; render(); }).catch(()=>{}); });
-    if (!ids.length){ stopData(); FID = null; ROOT = null; mode = "connecting"; showOnboard(); render(); return; }
-    const pref = lsGet("kas-fid");
-    const pick = ids.includes(FID) ? FID : ids.includes(pref) ? pref : ids[0];
-    if (pick !== FID || !started) openFamily(pick); else render();
+    famVal = snap.val() || {};
+    const all = Object.keys(famVal);
+    S.personalFid = all.find(k=>famVal[k]==="p") || null;
+    S.myFamilies = all.filter(k=>famVal[k]!=="p");
+    S.myFamilies.forEach(fid=>{ if (!S.famNames[fid]) rdb.ref("families/"+fid+"/meta/name").get().then(s=>{ S.famNames[fid] = s.val() || "Keluarga"; render(); }).catch(()=>{}); });
+    applySpace();
   };
   ref.on("value", cb, e=>{ console.warn(e); showOnboard(); });
   famListOff = ()=>ref.off("value", cb);
 }
+document.addEventListener("click", e=>{ const b = e.target.closest("[data-space]"); if (b) setSpace(b.dataset.space); });
 function showOnboard(){
   $("onboard").hidden = false; $("obEmail").textContent = currentUser ? currentUser.email : "";
   $("obMsg").textContent = "";
@@ -2118,6 +2161,7 @@ $("obForm").addEventListener("submit", async e=>{
   finally { $("obCreate").disabled = false; }
 });
 $("obOut").onclick = ()=>auth.signOut();
+$("obPersonal").onclick = ()=>setSpace("personal");
 $("addMember").onclick = openAddMember;
 $("switchFam").onclick = openSwitchFamily;
 $("leaveFam").onclick = leaveFamily;
@@ -2150,7 +2194,7 @@ go(["beranda","transaksi","anggaran","profil"].includes(h0) ? h0 : "beranda");
   auth.getRedirectResult().catch(e=>{ if (e && e.code && e.code!=="auth/no-auth-event") showLogin("Gagal masuk: " + (e.message||e.code), true); });
   auth.onAuthStateChanged(user=>{
     currentUser = user;
-    if (!user){ if (famListOff){ famListOff(); famListOff = null; } stopData(); FID = null; ROOT = null; ME = null; mode = "connecting"; $("onboard").hidden = true; showLogin(); render(); return; }
+    if (!user){ famVal = null; $("spaceSw").hidden = true; if (famListOff){ famListOff(); famListOff = null; } stopData(); FID = null; ROOT = null; ME = null; mode = "connecting"; $("onboard").hidden = true; showLogin(); render(); return; }
     ME = emailKey(user.email);
     $("userEmail").textContent = user.email || "";
     $("login").hidden = true;
