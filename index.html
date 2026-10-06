@@ -139,6 +139,10 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .ov-legend b{font-size:13px;font-weight:800}
 .ov-foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;border-top:1px solid var(--line);padding-top:10px}
 
+/* overview type toggle */
+.seg.ovtog{box-shadow:none;background:var(--sunk);padding:3px;margin-bottom:4px}
+.seg.ovtog button{padding:7px 6px;font-size:12.5px}
+
 /* segmented + search */
 .seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-radius:999px;padding:4px;box-shadow:var(--shadow)}
 .seg.two{grid-template-columns:1fr 1fr}
@@ -450,7 +454,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
     </section>
 
     <section class="sec">
-      <div class="sec-h"><h2>Pengeluaran</h2><select class="ov-sel" id="ovPeriod" aria-label="Periode"></select></div>
+      <div class="sec-h"><h2>Ringkasan</h2><select class="ov-sel" id="ovPeriod" aria-label="Periode"></select></div>
       <div class="card" id="homeDonut"></div>
     </section>
 
@@ -688,7 +692,7 @@ const CAT_STYLE = {
   [BILLCAT]:["receipt","#5A5CF0"], [GROC]:["cart","#8B5CF6"], "Makan di luar":["food","#FF8A3D"],
   "Transport & bensin":["car","#3B82F6"], "Anak & sekolah":["school","#14B8A6"], "Kesehatan":["heart","#EB4747"],
   "Rumah tangga":["tool","#F5B82E"], "Sosial & hadiah":["gift","#EC4899"], "Lainnya":["dots","#9CA3AF"],
-  "Gaji":["wallet","#1FAE78"], "Usaha / sampingan":["wallet","#14B8A6"], "Bonus":["gift","#1FAE78"]
+  "Gaji":["wallet","#1FAE78"], "Usaha / sampingan":["wallet","#14B8A6"], "Bonus":["gift","#F5B82E"]
 };
 const catStyle = c => CAT_STYLE[c] || ["dots","#9CA3AF"];
 const ICONS = {
@@ -1040,9 +1044,26 @@ function spendIn(isoTest){
     const d = paidDateOf(v); if (d && isoTest(d)) by[BILLCAT]=(by[BILLCAT]||0)+realOf(v); }));
   return by;
 }
-let ovPeriod = "month";
+let ovPeriod = "month", ovType = "exp";
+/* income by category for a set of dates: main income on payday + income transactions */
+function incomeIn(isoTest, monthsMain){
+  const by = {};
+  S.txAll.forEach(t=>{ if (t.type==="inc" && isoTest(t.date)) by[t.category]=(by[t.category]||0)+t.amount; });
+  monthsMain.forEach(([m, amt])=>{ if (!amt) return; const d = `${m}-${pad(Math.min(parseInt(S.settings.payday,10)||1, monthInfo(m).days))}`;
+    if (isoTest(d)) by["Gaji"] = (by["Gaji"]||0) + amt; });
+  return by;
+}
 function overviewData(c){
   const prevYm = shiftYm(ym,-1);
+  if (ovType==="inc"){
+    const mainOf = (m, doc) => doc && doc.income!=null ? Number(doc.income)||0 : Number(S.settings.income)||0;
+    if (ovPeriod==="week"){
+      const w = weeksOf(ymOf(today)).find(x=>x.isos.includes(todayISO));
+      return { by: incomeIn(d=>w.isos.includes(d), [[ym, mainOf(ym, S.month)], [prevYm, mainOf(prevYm, S.prevMonth)]]), label:`minggu ${w.label}` };
+    }
+    if (ovPeriod==="prev") return { by: incomeIn(d=>d.slice(0,7)===prevYm, [[prevYm, mainOf(prevYm, S.prevMonth)]]), label: monthInfo(prevYm).label };
+    return { by: incomeIn(d=>d.slice(0,7)===ym, [[ym, incomeBase()]]), label: c.info.label };
+  }
   if (ovPeriod==="week"){
     const w = weeksOf(ymOf(today)).find(x=>x.isos.includes(todayISO));
     return { by: spendIn(d=>w.isos.includes(d)), label:`minggu ${w.label}` };
@@ -1064,7 +1085,8 @@ function donutHtml(c){
   let rows = Object.entries(by).filter(r=>r[1]>0).sort((a,b)=>b[1]-a[1]);
   if (rows.length>5){ const rest = rows.slice(4).reduce((a,r)=>a+r[1],0); rows = [...rows.slice(0,4), ["Lainnya", rest]]; }
   const total = rows.reduce((a,r)=>a+r[1],0);
-  if (!total) return `<div class="empty">Belum ada pengeluaran.</div>`;
+  const tog = `<div class="seg two ovtog" role="group" aria-label="Jenis ringkasan"><button type="button" data-ovt="exp" aria-pressed="${ovType==="exp"}">Pengeluaran</button><button type="button" data-ovt="inc" aria-pressed="${ovType==="inc"}">Pemasukan</button></div>`;
+  if (!total) return tog + `<div class="empty">Belum ada ${ovType==="inc"?"pemasukan":"pengeluaran"}.</div>`;
   // conic ring: each slice fades into a lighter tint, thin white gaps between slices
   const gap = rows.length>1 ? 1.6 : 0;
   let deg = 0; const stops = [];
@@ -1077,10 +1099,10 @@ function donutHtml(c){
   });
   const pctOf = v => { const p = v/total*100; return p<1 ? "<1%" : Math.round(p)+"%"; };
   const top = rows[0];
-  return `<div class="ov">
+  return tog + `<div class="ov">
     <div class="ring" role="img" aria-label="Total pengeluaran ${rp(total)}">
       <div class="fill" style="background:conic-gradient(from -90deg, ${stops.join(",")})"></div>
-      <div class="ctr"><b>${short(total)}</b><small>Total keluar</small></div>
+      <div class="ctr"><b>${short(total)}</b><small>${ovType==="inc"?"Total masuk":"Total keluar"}</small></div>
     </div>
     <ul class="ov-legend">${rows.map(([k,v])=>`<li style="--c:${catStyle(k)[1]}"><i class="dot"></i><span>${esc(k)}<small>${rp(v)}</small></span><b>${pctOf(v)}</b></li>`).join("")}</ul>
   </div>
@@ -1852,6 +1874,7 @@ $("setPayday").onclick=openPayday;
 $("addCatBudget").onclick=()=>openCatBudget(); $("addCatBudget2").onclick=()=>openCatBudget();
 $("setName").onclick=openName;
 $("ovPeriod").addEventListener("change", e=>{ ovPeriod = e.target.value; render(); });
+document.addEventListener("click", e=>{ const b = e.target.closest("[data-ovt]"); if (b){ ovType = b.dataset.ovt; render(); } });
 enhanceSelect($("ovPeriod"), { chip:true, title:"Periode ringkasan" });
 $("txSearch").addEventListener("input", e=>{ txQuery = e.target.value; render(); });
 document.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{ txFilter=b.dataset.filter; render(); });
