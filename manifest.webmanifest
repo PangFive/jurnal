@@ -1,0 +1,21 @@
+{
+  "name": "Kas Keluarga",
+  "short_name": "Kas Keluarga",
+  "description": "Catatan keuangan keluarga: tagihan, belanja mingguan, anggaran, dan rencana khusus.",
+  "lang": "id",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EFF0FA",
+  "theme_color": "#EFF0FA",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Transaksi", "url": "./index.html#transaksi", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Anggaran", "url": "./index.html#anggaran", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
