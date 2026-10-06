@@ -225,7 +225,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .typechips button{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:7px 10px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
 .typechips button svg{width:16px;height:16px}
 .typechips button[aria-pressed="true"]{background:var(--primary-soft);border-color:var(--primary);color:var(--primary)}
-.irow{display:grid;grid-template-columns:minmax(0,1fr) 112px 32px;gap:8px;align-items:center}
+.irow{display:grid;grid-template-columns:auto minmax(0,1fr) 96px 32px;gap:8px;align-items:center}
 .irow input{border:1px solid var(--line);background:var(--sunk);border-radius:12px;padding:11px 12px;width:100%;min-width:0}
 .irow input:focus{border-color:var(--primary);outline:none}
 .irow .x{width:32px;height:32px}
@@ -270,6 +270,13 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .namerow{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center}
 .namerow .ic{width:48px;height:48px;border-radius:15px}
 
+.icbtn{position:relative;border:0;background:none;padding:0;border-radius:15px;flex:none}
+.icbtn .icbadge{position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;border:2px solid #fff}
+.icbtn .icbadge svg{width:10px;height:10px;stroke-width:2.6}
+.icbtn.sm .ic{width:42px;height:42px;border-radius:13px}
+.icbtn.sm .icbadge{width:17px;height:17px;right:-3px;bottom:-3px}
+.icbtn.sm .icbadge svg{width:8px;height:8px}
+
 /* custom dropdown */
 .fsel{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;border:1px solid var(--line);background:var(--sunk);border-radius:12px;padding:9px 10px 9px 12px;text-align:left;font-weight:600;font-size:13.5px;min-width:0;min-height:46px}
 .fsel:hover,.fsel[aria-expanded="true"]{border-color:var(--primary)}
@@ -281,9 +288,12 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .mini svg{width:15px;height:15px}
 .fsel.chip{width:auto;min-height:0;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:999px;padding:6px 10px 6px 14px;font-size:12px}
 .picker-scrim{position:fixed;inset:0;z-index:45;display:flex;align-items:flex-end;justify-content:center;background:rgba(28,30,58,.4);animation:fadeIn .15s ease-out}
-.picker{width:100%;max-width:520px;max-height:78vh;overflow:auto;background:var(--surface);border-radius:28px 28px 0 0;padding:10px 14px calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:6px;
+.picker{width:100%;max-width:520px;max-height:80vh;overflow:hidden;background:var(--surface);border-radius:28px 28px 0 0;display:flex;flex-direction:column;transition:transform .2s ease;
   box-shadow:0 -10px 40px rgba(40,44,120,.18);animation:slideUp .22s cubic-bezier(.2,.9,.3,1)}
-.picker::before{content:"";justify-self:center;width:40px;height:4px;border-radius:999px;background:var(--line);margin-bottom:4px}
+.picker-list{overflow:auto;overscroll-behavior:contain;padding:2px 14px calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:6px;align-content:start}
+.picker-top .picker-h{padding:0 0 4px}
+.icgrp{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:10px 4px 2px}
+.picker-list .icgrid{padding:0 2px}
 .picker-h{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 6px}
 .picker-h h3{font-size:16px;font-weight:700}
 .popt{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:100%;border:0;background:none;border-radius:16px;padding:10px 10px;text-align:left;font-size:14px;font-weight:600;color:var(--ink)}
@@ -296,7 +306,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .popt .ic svg{width:18px;height:18px}
 .popt .dot0{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:var(--sunk);color:var(--muted);font-weight:800;font-size:13px}
 @keyframes slideUp{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
-@media (min-width:600px){.picker-scrim{align-items:center}.picker{border-radius:24px}.picker::before{display:none}}
+@media (min-width:600px){.picker-scrim{align-items:center}.picker{border-radius:24px}}
 @media (prefers-reduced-motion:reduce){.picker,.picker-scrim{animation:none}}
 
 /* confirm popup */
@@ -326,9 +336,14 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(28,30,58,.42);display:flex;align-items:flex-end;justify-content:center;z-index:20}
-.sheet{background:var(--surface);width:100%;max-width:520px;border-radius:28px 28px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom,0px));display:grid;gap:14px;max-height:92vh;overflow:auto}
-.sheet::before{content:"";justify-self:center;width:40px;height:4px;border-radius:999px;background:var(--line)}
-@media (min-width:600px){.scrim{align-items:center}.sheet{border-radius:28px;padding-top:18px}.sheet::before{display:none}}
+.sheet{background:var(--surface);width:100%;max-width:520px;border-radius:28px 28px 0 0;display:flex;flex-direction:column;max-height:92vh;overflow:hidden;transition:transform .2s ease}
+.sheet-top,.picker-top{flex:none;padding:8px 18px 6px;touch-action:none;cursor:grab;border-bottom:1px solid transparent;transition:border-color .2s}
+.sheet-top.shadow,.picker-top.shadow{border-bottom-color:var(--line)}
+.grab{width:40px;height:5px;border-radius:999px;background:#D7D9EA;margin:2px auto 10px}
+.sheet-body{overflow:auto;overscroll-behavior:contain;padding:4px 18px calc(20px + env(safe-area-inset-bottom,0px));display:grid;gap:14px;align-content:start}
+.sheet.dragging,.picker.dragging{transition:none}
+
+@media (min-width:600px){.scrim{align-items:center}.sheet{border-radius:28px}}
 .sheet-h{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .sheet h3{font-size:17px;font-weight:700}
 .x{border:0;background:var(--sunk);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
@@ -589,6 +604,45 @@ const P = {
   baby:'<circle cx="12" cy="6.5" r="3"/><path d="M8 21v-5l-2-2 3-3h6l3 3-2 2v5"/>',
   paw:'<circle cx="6.5" cy="10" r="1.6"/><circle cx="10" cy="6" r="1.6"/><circle cx="14" cy="6" r="1.6"/><circle cx="17.5" cy="10" r="1.6"/><path d="M12 12c-3 0-5 3.5-5 5.5 0 1.5 1.2 2.5 2.7 2.5.9 0 1.5-.5 2.3-.5s1.4.5 2.3.5c1.5 0 2.7-1 2.7-2.5 0-2-2-5.5-5-5.5z"/>',
   pill:'<path d="M10.5 3.5a5 5 0 0 1 7 7l-7 7a5 5 0 0 1-7-7z"/><path d="M7 7l7 7"/>',
+  key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l2 2M14 9l2 2"/>',
+  bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
+  sofa:'<path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3"/><path d="M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z"/><path d="M5 18v2M19 18v2"/>',
+  bin:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5"/>',
+  plant:'<path d="M7 21h10M12 21v-8M12 13c0-4 2.5-7 7-7 0 4.5-3 7-7 7zM12 15c0-3-2-5-5.5-5 0 3.5 2 5 5.5 5z"/>',
+  laptop:'<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/>',
+  cloud:'<path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.75 3.75 0 0 1 17.5 18z"/>',
+  bank:'<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
+  coins:'<ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v4c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/><path d="M9 14v3c0 1.7 2.7 3 6 3s6-1.3 6-3v-4c0-1.7-2.7-3-6-3"/>',
+  trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  percent:'<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>',
+  gem:'<path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18M12 20L8 9l2-5M12 20l4-11-2-5"/>',
+  doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+  umbrella:'<path d="M3 12a9 9 0 0 1 18 0z"/><path d="M12 12v7a2 2 0 0 1-4 0"/>',
+  handheart:'<path d="M12 8.5S10.5 6 8.5 6 6 8 7 9.5 12 13 12 13s4-2 5-3.5S17.5 6 15.5 6 12 8.5 12 8.5z"/><path d="M3 21h12l5-3.5a1.5 1.5 0 0 0-1.5-2.5L14 17H9.5M3 15h4l2.5 2"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/>',
+  book:'<path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2z"/><path d="M4 20a2 2 0 0 0 2 2h13v-4"/>',
+  hospital:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',
+  tooth:'<path d="M7 3c-2.5 0-4 2-4 4.5 0 3 1.5 4 2 7s1 6.5 2.5 6.5S9 16 12 16s3 5 4.5 5 2-3.5 2.5-6.5 2-4 2-7C21 5 19.5 3 17 3c-2 0-3 1-5 1S9 3 7 3z"/>',
+  smile:'<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1 1.3 2.2 2 3.5 2s2.5-.7 3.5-2M9 9.5h.01M15 9.5h.01"/>',
+  mosque:'<path d="M12 3c2 2 4 3 4 6H8c0-3 2-4 4-6z"/><path d="M5 21v-9h14v9M3 21h18M10 21v-4a2 2 0 0 1 4 0v4"/>',
+  bike:'<circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M5.5 17l4-7h5l4 7M9.5 10L8 7H6M14.5 10l1.5-3h2"/>',
+  bus:'<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3M16 18v3M8 14.5h.01M16 14.5h.01"/>',
+  train:'<rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 10h14M9 21l-2-4M15 21l2-4M9 13.5h.01M15 13.5h.01"/>',
+  fuel:'<path d="M4 21V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16M3 21h13M4 10h11"/><path d="M15 8l3 2v8a1.5 1.5 0 0 0 3 0V9l-3-3"/>',
+  parking:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M10 17V7h3.5a3 3 0 0 1 0 6H10"/>',
+  luggage:'<rect x="5" y="7" width="14" height="13" rx="2"/><path d="M9 7V4h6v3M9 11v5M15 11v5M8 20v1.5M16 20v1.5"/>',
+  pin:'<path d="M12 21s7-6 7-11.5A7 7 0 0 0 5 9.5C5 15 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  bed:'<path d="M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-8v6"/><circle cx="6.5" cy="11.5" r="2"/>',
+  bag:'<path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  coffee:'<path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 2.5v2.5M12 2.5v2.5"/>',
+  cake:'<path d="M4 21v-8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8M2 21h20M4 16c1.5 0 1.5 1 3 1s1.5-1 3-1 1.5 1 3 1 1.5-1 3-1 1.5 1 3 1M12 11V8"/>',
+  shirt:'<path d="M8 3l-5 3 2 4 2-1v12h10V9l2 1 2-4-5-3c-.5 1.5-2 2.5-4 2.5S8.5 4.5 8 3z"/>',
+  scissors:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 7.5L20 18M8.5 16.5L20 6"/>',
+  game:'<path d="M7 7h10a5 5 0 0 1 4.6 7l-1 2.3a2.5 2.5 0 0 1-4 .8L14 15h-4l-2.6 2.1a2.5 2.5 0 0 1-4-.8l-1-2.3A5 5 0 0 1 7 7z"/><path d="M8 10v3M6.5 11.5h3M15.5 11h.01M17.5 12.5h.01"/>',
+  music:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+  ticket:'<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M14 7v2M14 11v2M14 15v2"/>',
+  dumbbell:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
   trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'
 };
 const ico = (k, cls="i") => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[k]||P.receipt}</svg>`;
@@ -602,13 +656,56 @@ const CAT_STYLE = {
 };
 const catStyle = c => CAT_STYLE[c] || ["dots","#9CA3AF"];
 const ICONS = {
-  home:["home","#5A5CF0"], user:["user","#8B5CF6"], bolt:["bolt","#FF8A3D"], wifi:["wifi","#3B82F6"],
-  drop:["drop","#14B8A6"], shield:["shield","#1FAE78"], phone:["phone","#0EA5E9"], tv:["tv","#6366F1"],
-  flame:["flame","#F97316"], card:["card","#EB4747"], receipt:["receipt","#EC4899"], piggy:["piggy","#1FAE78"],
-  school:["school","#14B8A6"], baby:["baby","#EC4899"], heart:["heart","#EB4747"], pill:["pill","#F43F5E"],
-  car:["car","#3B82F6"], plane:["plane","#0EA5E9"], cart:["cart","#8B5CF6"], food:["food","#FF8A3D"],
-  tool:["tool","#F5B82E"], gift:["gift","#EC4899"], paw:["paw","#B7791F"], star:["star","#8B5CF6"]
+  home:["home","#5A5CF0"], bolt:["bolt","#FF8A3D"], drop:["drop","#14B8A6"], wifi:["wifi","#3B82F6"], flame:["flame","#F97316"], shield:["shield","#1FAE78"],
+  tv:["tv","#6366F1"], phone:["phone","#0EA5E9"], laptop:["laptop","#64748B"], cloud:["cloud","#38BDF8"], key:["key","#F5B82E"], bulb:["bulb","#EAB308"],
+  sofa:["sofa","#A16207"], tool:["tool","#F5B82E"], bin:["bin","#64748B"], plant:["plant","#16A34A"],
+  receipt:["receipt","#EC4899"], card:["card","#EB4747"], wallet:["wallet","#5A5CF0"], piggy:["piggy","#1FAE78"], bank:["bank","#334155"], coins:["coins","#EAB308"],
+  trend:["trend","#16A34A"], percent:["percent","#F97316"], gem:["gem","#0EA5E9"], doc:["doc","#64748B"], umbrella:["umbrella","#6366F1"], handheart:["handheart","#EC4899"],
+  user:["user","#8B5CF6"], users:["users","#6366F1"], baby:["baby","#EC4899"], school:["school","#14B8A6"], book:["book","#0EA5E9"], heart:["heart","#EB4747"],
+  pill:["pill","#F43F5E"], hospital:["hospital","#EB4747"], tooth:["tooth","#38BDF8"], smile:["smile","#F59E0B"], paw:["paw","#B7791F"], mosque:["mosque","#16A34A"],
+  car:["car","#3B82F6"], bike:["bike","#F97316"], bus:["bus","#EAB308"], train:["train","#6366F1"], fuel:["fuel","#EB4747"], parking:["parking","#3B82F6"],
+  plane:["plane","#0EA5E9"], bed:["bed","#8B5CF6"], luggage:["luggage","#A16207"], pin:["pin","#EB4747"],
+  cart:["cart","#8B5CF6"], bag:["bag","#EC4899"], food:["food","#FF8A3D"], coffee:["coffee","#A16207"], cake:["cake","#EC4899"], shirt:["shirt","#3B82F6"],
+  scissors:["scissors","#64748B"], gift:["gift","#EC4899"], game:["game","#8B5CF6"], music:["music","#6366F1"], ticket:["ticket","#F97316"], dumbbell:["dumbbell","#334155"],
+  star:["star","#8B5CF6"]
 };
+const ICON_GROUPS = [
+  ["Rumah & tagihan", ["home","bolt","drop","wifi","flame","shield","tv","phone","laptop","cloud","key","bulb","sofa","tool","bin","plant"]],
+  ["Keuangan", ["receipt","card","wallet","piggy","bank","coins","trend","percent","gem","doc","umbrella","handheart"]],
+  ["Keluarga & kesehatan", ["user","users","baby","school","book","heart","pill","hospital","tooth","smile","paw","mosque"]],
+  ["Transportasi & liburan", ["car","bike","bus","train","fuel","parking","plane","bed","luggage","pin"]],
+  ["Belanja & hiburan", ["cart","bag","food","coffee","cake","shirt","scissors","gift","game","music","ticket","dumbbell","star"]]
+];
+function itemGuess(name){
+  const n = (name||"").toLowerCase();
+  if (/pesawat|flight|transport/.test(n)) return "plane";
+  if (/kereta/.test(n)) return "train";
+  if (/\bbus\b|travel|shuttle/.test(n)) return "bus";
+  if (/bensin|mobil|rental|\btol\b|parkir|grab|gojek|taksi/.test(n)) return "car";
+  if (/penginapan|hotel|villa|homestay|kamar|resort/.test(n)) return "bed";
+  if (/makan|konsumsi|kuliner|catering/.test(n)) return "food";
+  if (/kopi|cafe|kafe|jajan/.test(n)) return "coffee";
+  if (/tiket|wisata|masuk|tour/.test(n)) return "ticket";
+  if (/oleh|souvenir|hadiah|kado/.test(n)) return "gift";
+  if (/belanja|shopping/.test(n)) return "bag";
+  if (/tempat|gedung|venue|lokasi|sewa/.test(n)) return "pin";
+  if (/dekor/.test(n)) return "star";
+  if (/kue|cake/.test(n)) return "cake";
+  if (/material|bahan|cat\b/.test(n)) return "tool";
+  if (/tukang|jasa|pekerja/.test(n)) return "users";
+  if (/perabot|furnitur|mebel|sofa|kasur/.test(n)) return "sofa";
+  if (/pangkal|spp|sekolah|kuliah|kursus/.test(n)) return "school";
+  if (/seragam|baju|pakaian|kostum/.test(n)) return "shirt";
+  if (/buku|alat tulis/.test(n)) return "book";
+  if (/obat|vitamin/.test(n)) return "pill";
+  if (/dokter|rumah sakit|\brs\b|klinik|biaya/.test(n)) return "hospital";
+  if (/gigi/.test(n)) return "tooth";
+  if (/foto|dokumentasi/.test(n)) return "star";
+  if (/musik|band|hiburan/.test(n)) return "music";
+  if (/total|dana/.test(n)) return "coins";
+  if (/lain/.test(n)) return "star";
+  return null;
+}
 function billGuess(name){
   const n = (name||"").toLowerCase();
   if (/sewa|rumah|kontrak|kos|kpr/.test(n)) return "home";
@@ -1180,13 +1277,17 @@ async function delPlanTx(id){ if (mode==="cloud") await write(col("plantx").doc(
 async function saveSettings(patch){ const next={...S.settings, ...patch}; if (mode==="cloud") await write(dref("settings/main").set(next)); else { S.settings=next; render(); } }
 
 /* ---------- icon picker ---------- */
-function iconGrid(id){ return `<div class="field"><label>Ikon</label><div class="icgrid" id="${id}" role="radiogroup" aria-label="Pilih ikon"></div></div>`; }
-function wireIconGrid(id, getSel, onPick){
-  const box = $(id);
-  const draw = ()=>{ const sel = getSel();
-    box.innerHTML = Object.entries(ICONS).map(([k,[g,c]])=>`<button type="button" class="icopt" role="radio" aria-checked="${k===sel}" aria-label="${k}" data-ic="${k}" style="--c:${c}">${ico(g)}</button>`).join(""); };
-  box.addEventListener("click", e=>{ const b = e.target.closest("[data-ic]"); if (!b) return; onPick(b.dataset.ic); draw(); });
-  draw(); return draw;
+const iconPrev = k => icon(ICONS[k] || ICONS.star) + `<span class="icbadge">${ico("edit")}</span>`;
+function openIconPopup(current, onPick, trigger){
+  pickerSel = { btn: trigger };
+  $("pickerPanel").setAttribute("aria-label", "Pilih ikon");
+  $("pickerPanel").innerHTML = `<div class="picker-top"><div class="grab" aria-hidden="true"></div><div class="picker-h"><h3>Pilih ikon</h3><button type="button" class="x" id="pickerX" aria-label="Tutup">${ico("x")}</button></div></div>
+    <div class="picker-list">${ICON_GROUPS.map(([g,keys])=>`<div class="icgrp">${g}</div><div class="icgrid">${keys.map(k=>{ const [gl,c] = ICONS[k];
+      return `<button type="button" class="icopt" role="radio" aria-checked="${k===current}" aria-label="${k}" data-ic="${k}" style="--c:${c}">${ico(gl)}</button>`; }).join("")}</div>`).join("")}</div>`;
+  $("picker").hidden = false;
+  $("pickerX").onclick = closePicker;
+  $("pickerPanel").querySelectorAll("[data-ic]").forEach(b=>b.onclick=()=>{ onPick(b.dataset.ic); closePicker(); });
+  const on = $("pickerPanel").querySelector('[aria-checked="true"]'); if (on) setTimeout(()=>on.scrollIntoView({block:"center"}), 30);
 }
 
 /* ---------- custom dropdown ---------- */
@@ -1197,7 +1298,8 @@ function optVisual(sel, text){
   const st = CAT_STYLE[text];
   if (st) return `<span class="mini" style="--c:${st[1]}">${ico(st[0])}</span>`;
   const pid = sel.dataset.plan, p = pid && S.plans.find(x=>x.id===pid);
-  if (p) return `<span class="mini" style="--c:${planVis(p)[1]}">${ico(planVis(p)[0])}</span>`;
+  if (p){ const it = (p.items||[]).find(i=>i.name===text); const v = ICONS[it && (it.icon || itemGuess(it.name))] || planVis(p);
+    return `<span class="mini" style="--c:${v[1]}">${ico(v[0])}</span>`; }
   return "";
 }
 function enhanceSelect(sel, opts={}){
@@ -1220,9 +1322,9 @@ function openPicker(sel, btn, title){
   btn.setAttribute("aria-expanded","true");
   const cur = sel.value;
   $("pickerPanel").setAttribute("aria-label", title);
-  $("pickerPanel").innerHTML = `<div class="picker-h"><h3>${esc(title)}</h3><button type="button" class="x" id="pickerX" aria-label="Tutup">${ico("x")}</button></div>` +
+  $("pickerPanel").innerHTML = `<div class="picker-top"><div class="grab" aria-hidden="true"></div><div class="picker-h"><h3>${esc(title)}</h3><button type="button" class="x" id="pickerX" aria-label="Tutup">${ico("x")}</button></div></div><div class="picker-list">` +
     [...sel.options].map((o,i)=>{ const vis = optVisual(sel, o.textContent);
-      return `<button type="button" class="popt" role="option" data-i="${i}" aria-selected="${o.value===cur}">${vis ? vis.replace('class="mini"','class="ic"') : `<span class="dot0">${esc(o.textContent.trim()[0]||"·")}</span>`}<span>${esc(o.textContent)}</span><span class="ck">${o.value===cur?ico("check"):""}</span></button>`; }).join("");
+      return `<button type="button" class="popt" role="option" data-i="${i}" aria-selected="${o.value===cur}">${vis ? vis.replace('class="mini"','class="ic"') : `<span class="dot0">${esc(o.textContent.trim()[0]||"·")}</span>`}<span>${esc(o.textContent)}</span><span class="ck">${o.value===cur?ico("check"):""}</span></button>`; }).join("") + `</div>`;
   $("picker").hidden = false;
   const on = $("pickerPanel").querySelector('[aria-selected="true"]'); setTimeout(()=>{ (on || $("pickerPanel").querySelector(".popt"))?.focus(); on?.scrollIntoView({block:"nearest"}); }, 30);
   $("pickerX").onclick = closePicker;
@@ -1231,17 +1333,35 @@ function openPicker(sel, btn, title){
 }
 function closePicker(){ $("picker").hidden = true; if (pickerSel){ pickerSel.btn.setAttribute("aria-expanded","false"); pickerSel.btn.focus(); } pickerSel = null; }
 $("picker").addEventListener("click", e=>{ if (e.target.id==="picker") closePicker(); });
+dragToClose($("pickerPanel"), ".picker-top", ()=>closePicker());
 $("picker").addEventListener("keydown", e=>{
   if (!["ArrowDown","ArrowUp"].includes(e.key)) return; e.preventDefault();
   const items = [...$("pickerPanel").querySelectorAll(".popt")], i = items.indexOf(document.activeElement);
   items[(i + (e.key==="ArrowDown"?1:-1) + items.length) % items.length]?.focus();
 });
 
+/* drag the top bar down to close */
+function dragToClose(panel, handleSel, onClose){
+  let y0 = null, dy = 0;
+  panel.addEventListener("pointerdown", e=>{
+    if (!e.target.closest(handleSel) || e.target.closest("button")) return;
+    y0 = e.clientY; dy = 0; panel.classList.add("dragging"); panel.setPointerCapture(e.pointerId);
+  });
+  panel.addEventListener("pointermove", e=>{ if (y0==null) return; dy = Math.max(0, e.clientY - y0); panel.style.transform = `translateY(${dy}px)`; });
+  const end = ()=>{ if (y0==null) return; y0 = null; panel.classList.remove("dragging");
+    if (dy > 90){ panel.style.transform = "translateY(100%)"; setTimeout(()=>{ panel.style.transform = ""; onClose(); }, 180); }
+    else panel.style.transform = ""; };
+  panel.addEventListener("pointerup", end); panel.addEventListener("pointercancel", end);
+}
+
 /* ---------- sheets ---------- */
 const sheet = $("sheet"), scrim = $("scrim");
+const sheetBody = () => sheet.querySelector(".sheet-body") || sheet;
+dragToClose(sheet, ".sheet-top", ()=>closeSheet());
 let onSubmit = null;
 function openSheet(title, html, submit, focusId){
-  sheet.innerHTML = `<div class="sheet-h"><h3>${title}</h3><button type="button" class="x" id="closeX" aria-label="Tutup">${ico("x")}</button></div>${html}`;
+  sheet.innerHTML = `<div class="sheet-top"><div class="grab" aria-hidden="true"></div><div class="sheet-h"><h3>${title}</h3><button type="button" class="x" id="closeX" aria-label="Tutup">${ico("x")}</button></div></div><div class="sheet-body">${html}</div>`;
+  sheetBody().addEventListener("scroll", e=>sheet.querySelector(".sheet-top").classList.toggle("shadow", e.target.scrollTop>4));
   onSubmit = submit; scrim.hidden = false; $("closeX").onclick = closeSheet;
   sheet.querySelectorAll("select").forEach(sl=>enhanceSelect(sl));
   const f = focusId && $(focusId); if (f) setTimeout(()=>f.focus(), 40);
@@ -1330,11 +1450,11 @@ function openPlanEdit(id){
   const p = id ? S.plans.find(x=>x.id===id) : null;
   let type = p ? (p.type||"other") : "trip";
   let rows = p ? (p.items||[]).map(i=>({...i})) : PLAN_TYPES.trip.items.map((n,k)=>({id:"i"+k, name:n, amount:0}));
-  const rowHtml = (r,k)=>`<div class="irow" data-row="${k}"><input aria-label="Nama rincian" data-iname value="${esc(r.name)}" placeholder="mis. Tiket pesawat"><input aria-label="Jumlah" data-iamt inputmode="decimal" value="${r.amount?short(r.amount).replace(" ",""):""}" placeholder="0"><button type="button" class="x" data-irm aria-label="Hapus rincian">${ico("x")}</button></div>`;
+  const rowIcon = r => r.icon || itemGuess(r.name) || (typeof curIcon==="function" ? curIcon() : "star");
+  const rowHtml = (r,k)=>`<div class="irow" data-row="${k}"><button type="button" class="icbtn sm" data-iic aria-label="Ikon rincian">${iconPrev(rowIcon(r))}</button><input aria-label="Nama rincian" data-iname value="${esc(r.name)}" placeholder="mis. Tiket pesawat"><input aria-label="Jumlah" data-iamt inputmode="decimal" value="${r.amount?short(r.amount).replace(" ",""):""}" placeholder="0"><button type="button" class="x" data-irm aria-label="Hapus rincian">${ico("x")}</button></div>`;
   openSheet(p ? "Ubah rencana" : "Rencana baru", `
     <div class="typechips" id="ptypes">${Object.entries(PLAN_TYPES).map(([k,t])=>`<button type="button" data-ptype="${k}" aria-pressed="${k===type}">${ico(t.icon)}${t.label}</button>`).join("")}</div>
-    <div class="field"><label for="pName">Nama rencana</label><div class="namerow"><span id="pPrev"></span><input id="pName" maxlength="40" value="${p?esc(p.name):""}" placeholder="mis. Liburan ke Bali"></div></div>
-    ${iconGrid("pIcons")}
+    <div class="field"><label for="pName">Nama rencana</label><div class="namerow"><button type="button" class="icbtn" id="pPrev" aria-label="Pilih ikon"></button><input id="pName" maxlength="40" value="${p?esc(p.name):""}" placeholder="mis. Liburan ke Bali"></div></div>
     <div class="twocol">
       <div class="field"><label for="pStart">Mulai</label><input type="date" id="pStart" value="${p&&p.start?p.start:""}"></div>
       <div class="field"><label for="pEnd">Selesai</label><input type="date" id="pEnd" value="${p&&p.end?p.end:""}"></div>
@@ -1346,7 +1466,7 @@ function openPlanEdit(id){
   `, async ()=>{
     sync();
     const name = $("pName").value.trim(); if (!name){ $("pName").focus(); return false; }
-    const items = rows.filter(r=>r.name.trim() || r.amount).map((r,k)=>({ id: r.id || "i"+Date.now().toString(36)+k, name: r.name.trim() || "Lain-lain", amount: r.amount||0 }));
+    const items = rows.filter(r=>r.name.trim() || r.amount).map((r,k)=>({ id: r.id || "i"+Date.now().toString(36)+k, name: r.name.trim() || "Lain-lain", amount: r.amount||0, icon: r.icon || itemGuess(r.name) || null }));
     if (!items.some(i=>i.amount)){ toast("Isi minimal satu jumlah di rincian anggaran"); return false; }
     let start = $("pStart").value || null, end = $("pEnd").value || null;
     if (start && end && end < start) [start, end] = [end, start];
@@ -1358,15 +1478,19 @@ function openPlanEdit(id){
   let pickedIcon = p && p.icon ? p.icon : null;
   const typeIconKey = ()=>{ const t = PLAN_TYPES[type]; return Object.keys(ICONS).find(k=>ICONS[k][0]===t.icon) || "star"; };
   const curIcon = ()=> pickedIcon || typeIconKey();
-  const pprev = ()=>{ $("pPrev").innerHTML = icon(ICONS[curIcon()]); };
-  const predraw = wireIconGrid("pIcons", curIcon, k=>{ pickedIcon = k; pprev(); });
+  const pprev = ()=>{ $("pPrev").innerHTML = iconPrev(curIcon()); };
+  const predraw = ()=>{ draw && draw(); };
+  $("pPrev").onclick = ()=>openIconPopup(curIcon(), k=>{ pickedIcon = k; pprev(); draw(); }, $("pPrev"));
   pprev();
   const box = $("irows");
   const sync = ()=>{ box.querySelectorAll("[data-row]").forEach(el=>{ const k=+el.dataset.row; rows[k].name = el.querySelector("[data-iname]").value; rows[k].amount = parseAmt(el.querySelector("[data-iamt]").value)||0; });
     $("itot").textContent = rp(rows.reduce((a,r)=>a+(r.amount||0),0)); };
   const draw = ()=>{ box.innerHTML = rows.map(rowHtml).join(""); sync(); };
-  box.addEventListener("input", sync);
-  box.addEventListener("click", e=>{ const rm = e.target.closest("[data-irm]"); if (!rm) return; sync(); rows.splice(+rm.closest("[data-row]").dataset.row,1); if (!rows.length) rows.push({name:"",amount:0}); draw(); });
+  box.addEventListener("input", ()=>{ sync(); box.querySelectorAll("[data-row]").forEach(el=>{ const r = rows[+el.dataset.row]; if (!r.icon) el.querySelector("[data-iic]").innerHTML = iconPrev(rowIcon(r)); }); });
+  box.addEventListener("click", e=>{
+    const ib = e.target.closest("[data-iic]");
+    if (ib){ sync(); const k = +ib.closest("[data-row]").dataset.row; openIconPopup(rowIcon(rows[k]), key=>{ rows[k].icon = key; draw(); }, ib); return; }
+    const rm = e.target.closest("[data-irm]"); if (!rm) return; sync(); rows.splice(+rm.closest("[data-row]").dataset.row,1); if (!rows.length) rows.push({name:"",amount:0}); draw(); });
   $("iadd").onclick = ()=>{ sync(); rows.push({name:"",amount:0}); draw(); box.lastElementChild.querySelector("input").focus(); };
   $("ptypes").querySelectorAll("[data-ptype]").forEach(b=>b.onclick=()=>{ sync(); type=b.dataset.ptype;
     $("ptypes").querySelectorAll("[data-ptype]").forEach(x=>x.setAttribute("aria-pressed", x===b));
@@ -1383,14 +1507,15 @@ function openPlan(id){
   const st = planStats(p), w = planWhen(p, st);
   const fmtD = iso => { const d = new Date(iso+"T00:00:00"); return `${d.getDate()} ${BLN3(d.getMonth())} ${d.getFullYear()}`; };
   const byNewest = (a,b)=>b.date.localeCompare(a.date)||(b.created||0)-(a.created||0);
-  const txRow = (t, save) => `<li class="row">${save?icon(["piggy",planVis(p)[1]]):icon(["receipt","#EB4747"])}
+  const txRow = (t, save) => `<li class="row">${save?icon(["piggy",planVis(p)[1]]):icon(itemVis(st.items.find(i=>i.id===t.item)))}
       <button type="button" class="nm" data-ptx="${esc(t.id)}"><b>${esc(save ? "Dana disisihkan" : (t.note || "Pengeluaran"))}</b><small>${fmtD(t.date)}${t.note&&save?` · ${esc(t.note)}`:""}</small></button>
       <div class="right"><span class="amt ${save?"save":"exp"}">${save?"+":"−"}${short(t.amount)}</span>${canWrite?`<button type="button" class="del" data-pdel="${esc(t.id)}" aria-label="Hapus">${ico("trash")}</button>`:""}</div></li>`;
-  const groups = [...st.items.map(i=>({ key:i.id, name:i.name, budget:i.amount })), ...(st.byItem._other ? [{ key:"_other", name:"Di luar rincian", budget:0 }] : [])];
+  const itemVis = it => ICONS[it && (it.icon || itemGuess(it.name))] || planVis(p);
+  const groups = [...st.items.map(i=>({ key:i.id, name:i.name, budget:i.amount, vis: itemVis(i) })), ...(st.byItem._other ? [{ key:"_other", name:"Di luar rincian", budget:0 }] : [])];
   const itemRows = groups.map(g=>{
     const txs = st.txs.filter(t=>t.type==="exp" && (t.item||"_other")===g.key).sort(byNewest);
     const sp = txs.reduce((a,t)=>a+t.amount,0), open = planOpenItems.has(p.id+"|"+g.key);
-    const ic = g.key==="_other" ? icon(catStyle("Lainnya")) : `<span class="ic" style="--c:${planVis(p)[1]}">${ico(planVis(p)[0])}</span>`;
+    const ic = g.key==="_other" ? icon(catStyle("Lainnya")) : icon(g.vis);
     return `<div class="pitem${open?" open":""}">
       <button type="button" class="cat" data-pitem="${esc(g.key)}" aria-expanded="${open}">${ic}
         <span class="mid"><b>${esc(g.name)} <small class="muted" style="font-weight:500">· ${txs.length} catatan</small></b>${barHtml(sp, g.budget, true)}<small>${rp(sp)} / ${g.budget?rp(g.budget):"tanpa anggaran"}${g.budget&&sp>g.budget?` · lewat ${rp(sp-g.budget)}`:g.budget?` · sisa ${rp(g.budget-sp)}`:""}</small></span>
@@ -1424,7 +1549,7 @@ function openPlan(id){
   `, null);
   sheet.querySelectorAll("[data-pitem]").forEach(b=>b.onclick=()=>{ const k = p.id+"|"+b.dataset.pitem;
     if (planOpenItems.has(k)) planOpenItems.delete(k); else planOpenItems.add(k);
-    const y = sheet.scrollTop; openPlan(p.id); sheet.scrollTop = y; });
+    const y = sheetBody().scrollTop; openPlan(p.id); sheetBody().scrollTop = y; });
   if (!canWrite) return;
   sheet.querySelectorAll("[data-pitemadd]").forEach(b=>b.onclick=()=>openPlanTx(p.id, "exp", null, { item: b.dataset.pitemadd }));
   $("pSave").onclick = ()=>openPlanTx(p.id, "save");
@@ -1512,14 +1637,13 @@ function openReport(){
     </div>
     <div style="display:grid;gap:4px">${listHtml}</div>
   `, null);
-  sheet.querySelectorAll("[data-rf]").forEach(b=>b.onclick=()=>{ reportFilter=b.dataset.rf; const y=sheet.scrollTop; openReport(); sheet.scrollTop=y; });
+  sheet.querySelectorAll("[data-rf]").forEach(b=>b.onclick=()=>{ reportFilter=b.dataset.rf; const y=sheetBody().scrollTop; openReport(); sheetBody().scrollTop=y; });
 }
 
 function openBill(id){
   const b = id ? S.bills.find(x=>x.id===id) : null;
   openSheet(b?"Ubah tagihan":"Tagihan baru", `
-    <div class="field"><label for="bName">Nama tagihan</label><div class="namerow"><span id="bPrev"></span><input id="bName" maxlength="40" value="${b?esc(b.name):""}" placeholder="mis. Iuran sampah"></div></div>
-    ${iconGrid("bIcons")}
+    <div class="field"><label for="bName">Nama tagihan</label><div class="namerow"><button type="button" class="icbtn" id="bPrev" aria-label="Pilih ikon"></button><input id="bName" maxlength="40" value="${b?esc(b.name):""}" placeholder="mis. Iuran sampah"></div></div>
     ${amountField("bAmt","Rencana per bulan", b? String(b.amount):"")}
     <div class="field"><label for="bDue">Jatuh tempo (tanggal)</label><input id="bDue" type="number" min="1" max="31" inputmode="numeric" value="${b&&b.dueDay?b.dueDay:""}" placeholder="opsional, 1–31"></div>
     <div class="actions"><button type="submit" class="btn primary">Simpan</button>${b?`<button type="button" class="btn danger" id="bDel">Hapus tagihan</button>`:""}</div>
@@ -1533,9 +1657,9 @@ function openBill(id){
   wireAmount("bAmt");
   let pickedIcon = b && b.icon ? b.icon : null;
   const curIcon = ()=> pickedIcon || billGuess($("bName").value);
-  const prev = ()=>{ $("bPrev").innerHTML = icon(ICONS[curIcon()]); };
-  const redraw = wireIconGrid("bIcons", curIcon, k=>{ pickedIcon = k; prev(); });
-  $("bName").addEventListener("input", ()=>{ if (!pickedIcon){ redraw(); prev(); } });
+  const prev = ()=>{ $("bPrev").innerHTML = iconPrev(curIcon()); };
+  $("bPrev").onclick = ()=>openIconPopup(curIcon(), k=>{ pickedIcon = k; prev(); }, $("bPrev"));
+  $("bName").addEventListener("input", ()=>{ if (!pickedIcon) prev(); });
   prev();
   if (b){ const del=$("bDel"); del.onclick=async()=>{ if (!(await askDelete("Hapus tagihan?", `${eB(b.name)} tidak akan muncul lagi di tagihan bulanan.`, "Hapus tagihan"))) return;
     try { await deleteBill(b.id); closeSheet(); toast("Tagihan dihapus"); } catch(e){ fail(e); } }; }
