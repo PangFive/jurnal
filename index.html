@@ -261,6 +261,15 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .rtotal small{font-size:12px;opacity:.9}
 .rtotal b{font-size:20px;font-weight:800}
 
+/* icon picker */
+.icgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.icopt{aspect-ratio:1;max-width:100%;border:2px solid transparent;border-radius:14px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 13%,#fff);padding:0;transition:transform .12s}
+.icopt svg{width:20px;height:20px}
+.icopt:hover{transform:scale(1.06)}
+.icopt[aria-checked="true"]{background:var(--c);color:#fff;box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--c)}
+.namerow{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center}
+.namerow .ic{width:48px;height:48px;border-radius:15px}
+
 /* custom dropdown */
 .fsel{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;border:1px solid var(--line);background:var(--sunk);border-radius:12px;padding:9px 10px 9px 12px;text-align:left;font-weight:600;font-size:13.5px;min-width:0;min-height:46px}
 .fsel:hover,.fsel[aria-expanded="true"]{border-color:var(--primary)}
@@ -378,41 +387,41 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
   <main class="screen" data-screen="beranda">
     <section class="balance" aria-label="Ringkasan bulan">
       <div class="bal-top">
-        <div><div class="bal-lbl">Sisa uang bulan ini</div><div class="bal-big" id="balLeft">Rp 0</div><div class="bal-trend" id="balTrend"></div></div>
+        <div><div class="bal-lbl">Sisa uang</div><div class="bal-big" id="balLeft">Rp 0</div><div class="bal-trend" id="balTrend"></div></div>
         <div class="wallet" aria-hidden="true"><span><svg class="i" viewBox="0 0 24 24" style="color:#fff"><path d="M4 7h15a1 1 0 0 1 1 1v11H5a1 1 0 0 1-1-1z"/><path d="M4 7l11-3v3"/><circle cx="16" cy="13" r="1.2"/></svg></span></div>
       </div>
       <div class="bal-stats">
         <button id="incomeBtn" type="button"><small>Pemasukan ✎</small><b id="balIn">Rp 0</b></button>
         <div><small>Terpakai</small><b id="balOut">Rp 0</b></div>
         <div><small>Anggaran</small><b id="balPlan">Rp 0</b></div>
-        <div><small>Disisihkan ke rencana</small><b id="balSave">Rp 0</b></div>
+        <div><small>Disisihkan</small><b id="balSave">Rp 0</b></div>
       </div>
     </section>
 
-    <button type="button" class="reportbtn" data-report><span class="ic solid" style="--c:var(--primary)"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/></svg></span><span><b id="reportLbl">Laporan lengkap bulan ini</b><small>Pengeluaran bulanan + rencana khusus dalam satu ringkasan</small></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button type="button" class="reportbtn" data-report><span class="ic solid" style="--c:var(--primary)"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/></svg></span><span><b id="reportLbl">Laporan bulan ini</b></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
 
     <section class="sec">
-      <div class="sec-h"><h2>Rencana khusus</h2><button class="link" data-go="anggaran" data-anchor="rencana">Lihat semua</button></div>
+      <div class="sec-h"><h2>Rencana</h2><button class="link" data-go="anggaran" data-anchor="rencana">Semua</button></div>
       <div class="plans" id="homePlans"></div>
     </section>
 
     <section class="sec">
-      <div class="sec-h"><h2>Tagihan bulan ini</h2><button class="link" data-go="anggaran" data-anchor="tagihan">Lihat semua</button></div>
+      <div class="sec-h"><h2>Tagihan</h2><button class="link" data-go="anggaran" data-anchor="tagihan">Semua</button></div>
       <div class="card"><ul class="list" id="homeBills"></ul></div>
     </section>
 
     <section class="sec">
-      <div class="sec-h"><h2>Belanja minggu ini</h2><button class="link" data-go="anggaran" data-anchor="kalender">Kalender</button></div>
+      <div class="sec-h"><h2>Minggu ini</h2><button class="link" data-go="anggaran" data-anchor="kalender">Kalender</button></div>
       <div class="card" id="homeGroc"></div>
     </section>
 
     <section class="sec">
-      <div class="sec-h"><h2>Ringkasan pengeluaran</h2><select class="ov-sel" id="ovPeriod" aria-label="Periode"></select></div>
+      <div class="sec-h"><h2>Pengeluaran</h2><select class="ov-sel" id="ovPeriod" aria-label="Periode"></select></div>
       <div class="card" id="homeDonut"></div>
     </section>
 
     <section class="sec">
-      <div class="sec-h"><h2>Transaksi terakhir</h2><button class="link" data-go="transaksi">Lihat semua</button></div>
+      <div class="sec-h"><h2>Transaksi</h2><button class="link" data-go="transaksi">Semua</button></div>
       <div class="card"><ul class="list" id="homeTx"></ul></div>
     </section>
   </main>
@@ -425,7 +434,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
       <button type="button" data-filter="exp" aria-pressed="false">Pengeluaran</button>
     </div>
     <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="txSearch" type="search" placeholder="Cari transaksi, mis. pasar" autocomplete="off"></label>
-    <button type="button" class="reportbtn" data-report><span class="ic solid" style="--c:var(--primary)"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/></svg></span><span><b>Lihat laporan lengkap</b><small>Termasuk pengeluaran rencana khusus</small></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button type="button" class="reportbtn" data-report><span class="ic solid" style="--c:var(--primary)"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/></svg></span><span><b>Laporan bulan ini</b></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="sumrow"><div><small>Pemasukan</small><b class="down" id="txIn">Rp 0</b></div><div><small>Pengeluaran</small><b class="up" id="txOut">Rp 0</b></div></div>
     <div id="txGroups" class="screen" style="gap:12px"></div>
   </main>
@@ -435,22 +444,22 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
     <section class="card" id="mbCard"></section>
 
     <section class="sec" id="kalender">
-      <div class="sec-h"><h2>Kalender anggaran &amp; realisasi</h2><button class="link" id="setGroc">Ubah belanja mingguan</button></div>
+      <div class="sec-h"><h2>Kalender</h2><button class="link" id="setGroc">Atur</button></div>
       <div class="card" id="cal"></div>
     </section>
 
     <section class="sec">
-      <div class="sec-h"><h2>Kategori</h2><button class="link" id="addCatBudget">+ Atur anggaran</button></div>
+      <div class="sec-h"><h2>Kategori</h2><button class="link" id="addCatBudget">+ Atur</button></div>
       <div class="card" id="cats" style="gap:0"></div>
     </section>
 
     <section class="sec" id="rencana">
-      <div class="sec-h"><h2>Rencana khusus</h2><button class="link" id="addPlan">+ Buat rencana</button></div>
+      <div class="sec-h"><h2>Rencana</h2><button class="link" id="addPlan">+ Baru</button></div>
       <div class="card" id="plansList" style="gap:0"></div>
     </section>
 
     <section class="sec" id="tagihan">
-      <div class="sec-h"><h2>Tagihan bulanan</h2><button class="link" id="addBill">+ Tambah tagihan</button></div>
+      <div class="sec-h"><h2>Tagihan</h2><button class="link" id="addBill">+ Tambah</button></div>
       <div class="card">
         <ul class="list" id="bills"></ul>
         <div class="stats">
@@ -469,35 +478,35 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
     <section class="sec">
       <div class="sec-h"><h2>Pemasukan</h2></div>
       <div class="card" style="gap:0">
-        <button class="set" id="setIncomeDefault"><span class="ic solid" style="--c:var(--green)">ICON_WALLET</span><span><b>Pemasukan rutin per bulan</b><small>Dipakai otomatis setiap bulan</small></span><span class="val" id="valIncomeDefault">—</span></button>
-        <button class="set" id="setIncomeMonth"><span class="ic solid" style="--c:var(--teal)">ICON_CAL</span><span><b>Pemasukan <span id="lblIncomeMonth"></span></b><small id="subIncomeMonth">Ubah kalau bulan ini berbeda</small></span><span class="val" id="valIncomeMonth">—</span></button>
+        <button class="set" id="setIncomeDefault"><span class="ic solid" style="--c:var(--green)">ICON_WALLET</span><span><b>Pemasukan rutin</b></span><span class="val" id="valIncomeDefault">—</span></button>
+        <button class="set" id="setIncomeMonth"><span class="ic solid" style="--c:var(--teal)">ICON_CAL</span><span><b><span id="lblIncomeMonth"></span></b><small id="subIncomeMonth"></small></span><span class="val" id="valIncomeMonth">—</span></button>
       </div>
     </section>
 
     <section class="sec">
       <div class="sec-h"><h2>Anggaran</h2></div>
       <div class="card" style="gap:0">
-        <button class="set" id="setGroc2"><span class="ic solid" style="--c:var(--purple)">ICON_CART</span><span><b>Belanja mingguan</b><small>Per minggu Senin–Minggu</small></span><span class="val" id="valGroc">—</span></button>
-        <button class="set" data-go="anggaran" data-anchor="tagihan"><span class="ic solid" style="--c:var(--primary)">ICON_RECEIPT</span><span><b>Tagihan bulanan</b><small id="subBills">Tambah, ubah, atau hapus tagihan</small></span><span class="val" id="valBills">—</span></button>
-        <button class="set" id="addCatBudget2"><span class="ic solid" style="--c:var(--orange)">ICON_PIE</span><span><b>Anggaran per kategori</b><small id="subCats">Batas untuk makan di luar, transport, dll.</small></span><span class="val" id="valCats">—</span></button>
+        <button class="set" id="setGroc2"><span class="ic solid" style="--c:var(--purple)">ICON_CART</span><span><b>Belanja mingguan</b></span><span class="val" id="valGroc">—</span></button>
+        <button class="set" data-go="anggaran" data-anchor="tagihan"><span class="ic solid" style="--c:var(--primary)">ICON_RECEIPT</span><span><b>Tagihan</b><small id="subBills"></small></span><span class="val" id="valBills">—</span></button>
+        <button class="set" id="addCatBudget2"><span class="ic solid" style="--c:var(--orange)">ICON_PIE</span><span><b>Anggaran kategori</b></span><span class="val" id="valCats">—</span></button>
       </div>
     </section>
 
     <section class="sec">
       <div class="sec-h"><h2>Lainnya</h2></div>
       <div class="card" style="gap:0">
-        <button class="set" id="setName"><span class="ic solid" style="--c:var(--pink)">ICON_USER</span><span><b>Nama keluarga</b><small>Muncul di sapaan beranda</small></span><span class="val" id="valName">—</span></button>
+        <button class="set" id="setName"><span class="ic solid" style="--c:var(--pink)">ICON_USER</span><span><b>Nama keluarga</b></span><span class="val" id="valName">—</span></button>
       </div>
     </section>
 
     <section class="sec">
-      <div class="sec-h"><h2>Data &amp; akun</h2></div>
+      <div class="sec-h"><h2>Akun</h2></div>
       <div class="card" style="gap:0">
-        <button class="set" id="exportBtn"><span class="ic solid" style="--c:var(--teal)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/></svg></span><span><b>Ekspor data</b><small>Unduh cadangan semua catatan (JSON)</small></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
-        <button class="set" id="importBtn"><span class="ic solid" style="--c:var(--blue)"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M5 20h14"/></svg></span><span><b>Impor data</b><small>Pulihkan dari file cadangan JSON</small></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="set" id="exportBtn"><span class="ic solid" style="--c:var(--teal)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/></svg></span><span><b>Ekspor data</b></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="set" id="importBtn"><span class="ic solid" style="--c:var(--blue)"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M5 20h14"/></svg></span><span><b>Impor data</b></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
         <button class="set" id="logoutBtn"><span class="ic solid" style="--c:var(--grey)"><svg class="i" viewBox="0 0 24 24"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/></svg></span><span><b>Keluar</b><small id="userEmail">—</small></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
       </div>
-      <div class="card tip"><div><b>Pakai bersama pasangan.</b> Tambahkan email Google pasangan Anda di aturan Realtime Database (lihat PANDUAN.md). Semua catatan tersimpan otomatis dan langsung terlihat di HP masing-masing.</div></div>
+      
     </section>
   </main>
 </div>
@@ -573,6 +582,13 @@ const P = {
   chevDown:'<path d="M6 9l6 6 6-6"/>',
   check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  phone:'<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
+  tv:'<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  flame:'<path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-4 2.5-5 .3 1.5 1 2.5 2 3 0-3 .5-5.5.5-8z"/>',
+  card:'<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/>',
+  baby:'<circle cx="12" cy="6.5" r="3"/><path d="M8 21v-5l-2-2 3-3h6l3 3-2 2v5"/>',
+  paw:'<circle cx="6.5" cy="10" r="1.6"/><circle cx="10" cy="6" r="1.6"/><circle cx="14" cy="6" r="1.6"/><circle cx="17.5" cy="10" r="1.6"/><path d="M12 12c-3 0-5 3.5-5 5.5 0 1.5 1.2 2.5 2.7 2.5.9 0 1.5-.5 2.3-.5s1.4.5 2.3.5c1.5 0 2.7-1 2.7-2.5 0-2-2-5.5-5-5.5z"/>',
+  pill:'<path d="M10.5 3.5a5 5 0 0 1 7 7l-7 7a5 5 0 0 1-7-7z"/><path d="M7 7l7 7"/>',
   trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'
 };
 const ico = (k, cls="i") => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[k]||P.receipt}</svg>`;
@@ -585,18 +601,37 @@ const CAT_STYLE = {
   "Gaji":["wallet","#1FAE78"], "Usaha / sampingan":["wallet","#14B8A6"], "Bonus":["gift","#1FAE78"]
 };
 const catStyle = c => CAT_STYLE[c] || ["dots","#9CA3AF"];
-function billStyle(name){
+const ICONS = {
+  home:["home","#5A5CF0"], user:["user","#8B5CF6"], bolt:["bolt","#FF8A3D"], wifi:["wifi","#3B82F6"],
+  drop:["drop","#14B8A6"], shield:["shield","#1FAE78"], phone:["phone","#0EA5E9"], tv:["tv","#6366F1"],
+  flame:["flame","#F97316"], card:["card","#EB4747"], receipt:["receipt","#EC4899"], piggy:["piggy","#1FAE78"],
+  school:["school","#14B8A6"], baby:["baby","#EC4899"], heart:["heart","#EB4747"], pill:["pill","#F43F5E"],
+  car:["car","#3B82F6"], plane:["plane","#0EA5E9"], cart:["cart","#8B5CF6"], food:["food","#FF8A3D"],
+  tool:["tool","#F5B82E"], gift:["gift","#EC4899"], paw:["paw","#B7791F"], star:["star","#8B5CF6"]
+};
+function billGuess(name){
   const n = (name||"").toLowerCase();
-  if (/sewa|rumah|kontrak|kos|kpr/.test(n)) return ["home","#5A5CF0"];
-  if (/\bart\b|asisten|pembantu|sopir|baby/.test(n)) return ["user","#8B5CF6"];
-  if (/listrik|pln|token/.test(n)) return ["bolt","#FF8A3D"];
-  if (/wifi|internet|indihome|biznet|pulsa|data/.test(n)) return ["wifi","#3B82F6"];
-  if (/\bipl\b|iuran|lingkungan|keamanan|sampah|rt\/rw/.test(n)) return ["shield","#1FAE78"];
-  if (/air|pdam|galon/.test(n)) return ["drop","#14B8A6"];
-  if (/sekolah|spp|les/.test(n)) return ["school","#14B8A6"];
-  if (/bpjs|asuransi|kesehatan/.test(n)) return ["heart","#EB4747"];
-  return ["receipt","#EC4899"];
+  if (/sewa|rumah|kontrak|kos|kpr/.test(n)) return "home";
+  if (/\bart\b|asisten|pembantu|sopir/.test(n)) return "user";
+  if (/listrik|pln|token/.test(n)) return "bolt";
+  if (/wifi|internet|indihome|biznet|data/.test(n)) return "wifi";
+  if (/pulsa|hp|telepon|telkomsel|xl\b|indosat/.test(n)) return "phone";
+  if (/tv|netflix|youtube|spotify|langganan|streaming/.test(n)) return "tv";
+  if (/gas|elpiji|lpg/.test(n)) return "flame";
+  if (/cicilan|kredit|kartu|paylater|pinjaman/.test(n)) return "card";
+  if (/tabung|investasi|reksa|emas|nabung/.test(n)) return "piggy";
+  if (/\bipl\b|iuran|lingkungan|keamanan|sampah|rt\/rw/.test(n)) return "shield";
+  if (/air|pdam|galon/.test(n)) return "drop";
+  if (/sekolah|spp|les|kursus/.test(n)) return "school";
+  if (/anak|bayi|susu|popok|daycare/.test(n)) return "baby";
+  if (/bpjs|asuransi|kesehatan/.test(n)) return "heart";
+  if (/obat|vitamin/.test(n)) return "pill";
+  if (/mobil|motor|bensin|parkir|tol/.test(n)) return "car";
+  if (/kucing|anjing|hewan|pet/.test(n)) return "paw";
+  return "receipt";
 }
+const billStyle = name => ICONS[billGuess(name)];
+const billIcon = b => ICONS[b && b.icon] || billStyle(b && b.name);
 const icon = ([k,c], solid) => `<span class="ic${solid?" solid":""}" style="--c:${c}">${ico(k)}</span>`;
 
 /* ---------- state ---------- */
@@ -719,7 +754,8 @@ const PLAN_TYPES = {
   other: { label:"Lainnya",    icon:"star",   color:"#8B5CF6", items:["Total"] }
 };
 const planType = p => PLAN_TYPES[p && p.type] || PLAN_TYPES.other;
-const planIcon = (p, solid) => icon([planType(p).icon, planType(p).color], solid);
+const planVis = p => ICONS[p && p.icon] || [planType(p).icon, planType(p).color];
+const planIcon = (p, solid) => icon(planVis(p), solid);
 const sortPlans = (a,b)=> (a.done?1:0)-(b.done?1:0) || (a.start||"9999").localeCompare(b.start||"9999") || (a.created||0)-(b.created||0);
 function planStats(p){
   const items = p.items || [];
@@ -803,7 +839,7 @@ function entries(c, withPlans){
       sub: t.type==="save" ? "Dana rencana khusus" : `${p.name}${item?` · ${item.name}`:""} · dari dana rencana`, category:"Rencana" }); });
   return list.sort((a,b)=> b.date.localeCompare(a.date) || b.created-a.created);
 }
-const entryIcon = e => e.kind==="plan" ? (e.type==="save" ? icon(["piggy", planType(e.plan).color]) : planIcon(e.plan)) : icon(e.kind==="bill" ? billStyle(e.bill.name) : catStyle(e.category));
+const entryIcon = e => e.kind==="plan" ? (e.type==="save" ? icon(["piggy", planVis(e.plan)[1]]) : planIcon(e.plan)) : icon(e.kind==="bill" ? billIcon(e.bill) : catStyle(e.category));
 function entryRow(e, withDel){
   return `<li class="row">${entryIcon(e)}
     <button type="button" class="nm" data-entry="${e.kind}:${esc(e.id)}"><b>${esc(e.title)}</b><small>${esc(e.sub)}</small></button>
@@ -850,7 +886,7 @@ function billRow(b, c, detailed){
     sub = b.dueDay ? `Jatuh tempo tgl ${b.dueDay}` : "Belum dibayar";
     right = `<div class="right"><span class="amt">${rp(b.amount)}</span><div style="display:flex;gap:6px;align-items:center">${pill}${canWrite?`<button type="button" class="btn-s" data-pay="${esc(b.id)}">Bayar</button>`:""}</div></div>`;
   }
-  return `<li class="row">${icon(billStyle(b.name))}
+  return `<li class="row">${icon(billIcon(b))}
     <button type="button" class="nm" ${detailed?`data-editbill="${esc(b.id)}"`:`data-pay="${esc(b.id)}"`}><b>${esc(b.name)}</b><small>${sub}</small></button>${right}</li>`;
 }
 
@@ -886,7 +922,7 @@ function donutHtml(c){
   let rows = Object.entries(by).filter(r=>r[1]>0).sort((a,b)=>b[1]-a[1]);
   if (rows.length>5){ const rest = rows.slice(4).reduce((a,r)=>a+r[1],0); rows = [...rows.slice(0,4), ["Lainnya", rest]]; }
   const total = rows.reduce((a,r)=>a+r[1],0);
-  if (!total) return `<div class="empty">Belum ada pengeluaran untuk ${label}. Bayar tagihan atau catat belanja, nanti rinciannya muncul di sini.</div>`;
+  if (!total) return `<div class="empty">Belum ada pengeluaran.</div>`;
   // conic ring: each slice fades into a lighter tint, thin white gaps between slices
   const gap = rows.length>1 ? 1.6 : 0;
   let deg = 0; const stops = [];
@@ -919,13 +955,13 @@ function renderHome(c){
   const left = c.income - c.spent - c.savedMonth;
   $("balLeft").textContent = rp(left);
   $("balSave").textContent = short(c.savedMonth);
-  $("reportLbl").textContent = `Laporan lengkap ${ym===ymOf(today)?"bulan ini":c.info.label}`;
+  $("reportLbl").textContent = `Laporan ${ym===ymOf(today)?"bulan ini":c.info.label}`;
   $("homePlans").innerHTML = plansCards();
   $("balIn").textContent = short(c.income);
   $("balOut").textContent = short(c.spent);
   $("balPlan").textContent = short(c.plan);
   // trend vs same point last month
-  let trend = c.income>0 ? `Perkiraan sisa akhir bulan ${short(c.projected)}` : "Ketuk Pemasukan untuk mengisi gaji bulan ini";
+  let trend = c.income>0 ? `Akhir bulan ±${short(c.projected)}` : "Isi pemasukan dulu";
   if (ym===ymOf(today)){
     const prevYm = shiftYm(ym,-1), dn = today.getDate();
     const prevTx = S.txAll.filter(t=>t.month===prevYm && t.type!=="inc" && +t.date.slice(8,10)<=dn).reduce((a,t)=>a+t.amount,0);
@@ -933,7 +969,7 @@ function renderHome(c){
     const prev = prevTx + prevBills;
     if (prev>0 && c.spent>0){
       const ch = (c.spent-prev)/prev*100;
-      trend = `${ch>0?"↑":"↓"} Pengeluaran ${Math.abs(ch).toLocaleString("id-ID",{maximumFractionDigits:1})}% ${ch>0?"lebih banyak":"lebih sedikit"} dari bulan lalu`;
+      trend = `${ch>0?"↑":"↓"} ${Math.abs(ch).toLocaleString("id-ID",{maximumFractionDigits:0})}% vs bulan lalu`;
     }
   }
   $("balTrend").textContent = trend;
@@ -941,12 +977,12 @@ function renderHome(c){
   // bills: unpaid first
   const bills = [...S.bills].sort((a,b)=> (c.paid[a.id]!=null) - (c.paid[b.id]!=null));
   $("homeBills").innerHTML = bills.length ? bills.slice(0,4).map(b=>billRow(b,c,false)).join("") +
-    (bills.length>4 ? `<li class="empty" style="text-align:center">+${bills.length-4} tagihan lain di Anggaran</li>` : "")
-    : `<li class="empty">Belum ada tagihan bulanan.</li>`;
+    (bills.length>4 ? `<li class="empty" style="text-align:center">+${bills.length-4} lainnya</li>` : "")
+    : `<li class="empty">Belum ada tagihan.</li>`;
 
   // groceries this week
   if (!c.weekly){
-    $("homeGroc").innerHTML = `<div class="empty">Belum ada anggaran belanja mingguan. Atur di menu Profil.</div>`;
+    $("homeGroc").innerHTML = `<div class="empty">Anggaran belanja belum diatur.</div>`;
   } else {
     const {w, spent} = weekNow(c), sisa = c.weekly - spent;
     $("homeGroc").innerHTML = `
@@ -958,7 +994,7 @@ function renderHome(c){
   }
   $("homeDonut").innerHTML = donutHtml(c);
   const es = entries(c).slice(0,5);
-  $("homeTx").innerHTML = es.length ? es.map(e=>entryRow(e,false)).join("") : `<li class="empty">Belum ada transaksi. Ketuk tombol + di bawah untuk mencatat.</li>`;
+  $("homeTx").innerHTML = es.length ? es.map(e=>entryRow(e,false)).join("") : `<li class="empty">Belum ada transaksi.</li>`;
 }
 
 function renderTx(c){
@@ -970,7 +1006,7 @@ function renderTx(c){
   $("txIn").textContent = rp(es.filter(e=>e.type==="inc").reduce((a,e)=>a+e.amount,0));
   $("txOut").textContent = rp(es.filter(e=>e.type==="exp").reduce((a,e)=>a+e.amount,0));
   if (!es.length){
-    $("txGroups").innerHTML = `<div class="card"><div class="empty">${q||txFilter!=="all" ? "Tidak ada transaksi yang cocok." : `Belum ada transaksi di ${c.info.label}. Ketuk tombol + di bawah untuk mencatat.`}</div></div>`;
+    $("txGroups").innerHTML = `<div class="card"><div class="empty">${q||txFilter!=="all" ? "Tidak ada transaksi yang cocok." : "Belum ada transaksi."}</div></div>`;
     return;
   }
   const groups = {}; es.forEach(e=>{ (groups[e.date] ||= []).push(e); });
@@ -991,7 +1027,7 @@ function plansCards(){
       ${barHtml(st.saved, st.budget, true)}
       <small>${st.spent ? `Terpakai ${short(st.spent)} · sisa dana ${short(st.wallet)}` : st.perMonth ? `Sisihkan ${short(st.perMonth)}/bulan` : `${Math.round(pct(st.saved,st.budget))}% terkumpul`}</small>
     </button>`; }).join("") +
-    (canWrite ? `<button type="button" class="pcard new" data-newplan>${icon(["plus","#5A5CF0"])}<span>Buat rencana</span><small style="font-weight:500">mis. jalan-jalan, acara, renovasi</small></button>` : "");
+    (canWrite ? `<button type="button" class="pcard new" data-newplan>${icon(["plus","#5A5CF0"])}<span>Rencana baru</span></button>` : "");
 }
 function renderPlansList(){
   const ps = [...S.plans].sort(sortPlans);
@@ -999,7 +1035,7 @@ function renderPlansList(){
     return `<button type="button" class="prow" data-plan="${esc(p.id)}">${planIcon(p,true)}
       <span class="mid"><b>${esc(p.name)}</b>${barHtml(st.saved, st.budget, true)}<small>Terkumpul ${short(st.saved)} / ${short(st.budget)} · terpakai ${short(st.spent)}</small></span>
       <span style="display:grid;justify-items:end;gap:4px">${w.tag || `<span class="tag done">${planType(p).label}</span>`}<small class="muted" style="font-size:11px">${Math.round(pct(st.saved,st.budget))}%</small></span></button>`; }).join("")
-    : `<div class="empty">Belum ada rencana. Buat kantong dana untuk jalan-jalan, acara keluarga, atau kebutuhan besar lain, lalu sisihkan uangnya sedikit demi sedikit.</div>`;
+    : `<div class="empty">Belum ada rencana.</div>`;
 }
 
 function renderBudget(c){
@@ -1009,13 +1045,13 @@ function renderBudget(c){
     <div class="mb-top"><div><small>Anggaran bulanan</small><div class="mb-big">${rp(c.plan)}</div></div>
       <div><small style="text-align:right">Terpakai</small><div class="mb-spent">${rp(c.spent)}</div></div></div>
     ${barHtml(c.spent, c.plan)}
-    <div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;flex-wrap:wrap"><span class="muted">${used}% anggaran terpakai</span><b class="${sisa<0?"up":"down"}">${sisa<0?"Lewat "+rp(-sisa):"Sisa "+rp(sisa)}</b></div>
+    <div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;flex-wrap:wrap"><span class="muted">${used}% terpakai</span><b class="${sisa<0?"up":"down"}">${sisa<0?"Lewat "+rp(-sisa):"Sisa "+rp(sisa)}</b></div>
     <div class="stats">
       <div class="stat"><small>Tagihan</small><b>${short(c.billsTotal)}</b></div>
       <div class="stat"><small>Belanja ${c.grocWeeks} mgg</small><b>${short(c.grocBudget)}</b></div>
       <div class="stat"><small>Kategori lain</small><b>${short(c.plan-c.billsTotal-c.grocBudget)}</b></div>
     </div>
-    ${c.savedMonth ? `<div class="advice">Bulan ini <b>${rp(c.savedMonth)}</b> disisihkan untuk rencana khusus.</div>` : ""}`;
+    ${c.savedMonth ? `<div class="advice">Disisihkan <b>${rp(c.savedMonth)}</b></div>` : ""}`;
 
   // calendar
   const {m:cm} = c.info, dayNow = dayNowOf();
@@ -1032,12 +1068,11 @@ function renderBudget(c){
         <span class="n">${d}</span><span class="v">${tot?short(tot).replace(" ",""):""}</span><span class="dots">${dots}</span></button>`;
     });
     grid += c.weekly
-      ? `<div class="wk${w.isos.includes(todayISO)?" cur":""}${w.own?"":" other"}"><span>Belanja ${w.label}${w.own?"":` · ${w.ownerLabel}`}</span>${barHtml(w.spent,c.weekly,true)}<span><b>${short(w.spent)}</b> / ${short(c.weekly)}</span></div>`
+      ? `<div class="wk${w.isos.includes(todayISO)?" cur":""}${w.own?"":" other"}"><span>${w.label}</span>${barHtml(w.spent,c.weekly,true)}<span><b>${short(w.spent)}</b> / ${short(c.weekly)}</span></div>`
       : `<div class="wk"><span>${w.label}</span><span></span><span>keluar <b>${short(w.isos.reduce((a,iso)=>a+dd[iso].total,0))}</b></span></div>`;
   });
   $("cal").innerHTML = `<div class="cal">${grid}</div>
-    <div class="legend-row"><span><i style="background:color-mix(in srgb,var(--red) 25%,#fff)"></i>Ada pengeluaran</span><span><i style="background:var(--primary)"></i>Jatuh tempo</span><span><i style="background:var(--green)"></i>Lunas</span><span><i style="background:var(--red)"></i>Telat</span></div>
-    <div style="font-size:11.5px" class="muted">Ketuk tanggal untuk melihat rincian, mencatat, atau menghapus. ${c.weekly?`Belanja ${BULAN[cm-1]}: ${c.grocWeeks} minggu × ${short(c.weekly)}.`:""}${S.bills.some(b=>!b.dueDay)?" Isi tanggal jatuh tempo tagihan supaya muncul di kalender.":""}</div>`;
+    <div class="legend-row"><span><i style="background:color-mix(in srgb,var(--red) 25%,#fff)"></i>Ada pengeluaran</span><span><i style="background:var(--primary)"></i>Jatuh tempo</span><span><i style="background:var(--green)"></i>Lunas</span><span><i style="background:var(--red)"></i>Telat</span></div>`;
 
   // categories
   const rows = [
@@ -1052,10 +1087,10 @@ function renderBudget(c){
     return `<button type="button" class="cat" data-cat="${esc(r.key)}" data-act="${r.act}">${icon(catStyle(r.key), true)}
       <span class="mid"><b>${esc(r.key)}</b>${barHtml(r.spent, r.budget, true)}<small>${r.sub}</small></span>
       <span class="pct ${p!=null&&p>100?"up":""}">${p==null?"—":p+"%"}</span></button>`;
-  }).join("") + (rows.length<=2 ? `<div class="empty" style="padding-top:10px">Pengeluaran lain seperti makan di luar atau transport akan muncul di sini. Ketuk “+ Atur anggaran” untuk memberi batas.</div>` : "");
+  }).join("") + (rows.length<=2 ? `` : "");
 
   // bills detailed
-  $("bills").innerHTML = S.bills.length ? S.bills.map(b=>billRow(b,c,true)).join("") : `<li class="empty">Belum ada tagihan bulanan.</li>`;
+  $("bills").innerHTML = S.bills.length ? S.bills.map(b=>billRow(b,c,true)).join("") : `<li class="empty">Belum ada tagihan.</li>`;
   const nPaid = S.bills.filter(b=>c.paid[b.id]!=null).length;
   $("billsPlan").textContent = rp(c.billsTotal);
   $("billsReal").textContent = rp(c.paidTotal);
@@ -1072,10 +1107,10 @@ function renderProfile(c){
   $("valIncomeDefault").textContent = S.settings.income ? short(S.settings.income) : "Atur";
   $("lblIncomeMonth").textContent = c.info.label;
   $("valIncomeMonth").textContent = incomeBase() ? short(incomeBase()) : "Atur";
-  $("subIncomeMonth").textContent = S.month.income!=null ? "Khusus bulan ini" : "Mengikuti pemasukan rutin";
+  $("subIncomeMonth").textContent = S.month.income!=null ? "Khusus bulan ini" : "";
   $("valGroc").textContent = c.weekly ? short(c.weekly) : "Atur";
   $("valBills").textContent = short(c.billsTotal);
-  $("subBills").textContent = `${S.bills.length} tagihan · ketuk untuk mengelola`;
+  $("subBills").textContent = `${S.bills.length} tagihan`;
   const n = BUDGETABLE.filter(k=>Number(c.catBudgets[k])>0).length;
   $("valCats").textContent = n ? `${n} kategori` : "Atur";
   $("valName").textContent = name;
@@ -1144,6 +1179,16 @@ async function savePlanTx(id, data){
 async function delPlanTx(id){ if (mode==="cloud") await write(col("plantx").doc(id).delete()); else { S.planTx = S.planTx.filter(t=>t.id!==id); render(); } }
 async function saveSettings(patch){ const next={...S.settings, ...patch}; if (mode==="cloud") await write(dref("settings/main").set(next)); else { S.settings=next; render(); } }
 
+/* ---------- icon picker ---------- */
+function iconGrid(id){ return `<div class="field"><label>Ikon</label><div class="icgrid" id="${id}" role="radiogroup" aria-label="Pilih ikon"></div></div>`; }
+function wireIconGrid(id, getSel, onPick){
+  const box = $(id);
+  const draw = ()=>{ const sel = getSel();
+    box.innerHTML = Object.entries(ICONS).map(([k,[g,c]])=>`<button type="button" class="icopt" role="radio" aria-checked="${k===sel}" aria-label="${k}" data-ic="${k}" style="--c:${c}">${ico(g)}</button>`).join(""); };
+  box.addEventListener("click", e=>{ const b = e.target.closest("[data-ic]"); if (!b) return; onPick(b.dataset.ic); draw(); });
+  draw(); return draw;
+}
+
 /* ---------- custom dropdown ---------- */
 let pickerSel = null;
 function optVisual(sel, text){
@@ -1152,7 +1197,7 @@ function optVisual(sel, text){
   const st = CAT_STYLE[text];
   if (st) return `<span class="mini" style="--c:${st[1]}">${ico(st[0])}</span>`;
   const pid = sel.dataset.plan, p = pid && S.plans.find(x=>x.id===pid);
-  if (p) return `<span class="mini" style="--c:${planType(p).color}">${ico(planType(p).icon)}</span>`;
+  if (p) return `<span class="mini" style="--c:${planVis(p)[1]}">${ico(planVis(p)[0])}</span>`;
   return "";
 }
 function enhanceSelect(sel, opts={}){
@@ -1210,7 +1255,7 @@ sheet.addEventListener("submit", async e=>{
   try { const ok = await onSubmit(); if (ok!==false) closeSheet(); } catch(err){ fail(err); }
   finally { if (btn) btn.disabled = false; }
 });
-const HINT = "Tulis 150rb, 1,8jt, atau 150.000";
+const HINT = "mis. 150rb atau 1,8jt";
 function amountField(id, label, value, chips){
   return `<div class="field"><label for="${id}" style="text-align:center">${label}</label>
     <input class="big" id="${id}" inputmode="decimal" autocomplete="off" placeholder="0" value="${value?esc(value):""}">
@@ -1264,7 +1309,7 @@ function openTx(preset={}, existing=null){
       <div class="field"><label for="txDate">Tanggal</label><input type="date" id="txDate" value="${dateDefault}"></div>
     </div>
     <div class="field"><label for="txNote">Catatan</label><input id="txNote" maxlength="80" value="${existing?esc(existing.note||""):""}" placeholder="mis. Pasar pagi, sayur dan ikan"></div>
-    ${!existing && S.plans.some(p=>!p.done) ? `<div class="forplan" id="forPlan"><label class="muted" style="font-size:12px;font-weight:600">Untuk rencana khusus?</label><div class="typechips">${S.plans.filter(p=>!p.done).sort(sortPlans).map(p=>`<button type="button" data-txplan="${esc(p.id)}">${ico(planType(p).icon)}${esc(p.name)}</button>`).join("")}</div></div>` : ""}
+    ${!existing && S.plans.some(p=>!p.done) ? `<div class="forplan" id="forPlan"><label class="muted" style="font-size:12px;font-weight:600">Untuk rencana khusus?</label><div class="typechips">${S.plans.filter(p=>!p.done).sort(sortPlans).map(p=>`<button type="button" data-txplan="${esc(p.id)}">${ico(planVis(p)[0])}${esc(p.name)}</button>`).join("")}</div></div>` : ""}
     <div class="actions"><button type="submit" class="btn primary">Simpan</button>${existing?`<button type="button" class="btn danger" id="txDel">Hapus transaksi</button>`:""}</div>
   `, async ()=>{
     const amount = readAmount("txAmt"); if (!amount) return false;
@@ -1288,7 +1333,8 @@ function openPlanEdit(id){
   const rowHtml = (r,k)=>`<div class="irow" data-row="${k}"><input aria-label="Nama rincian" data-iname value="${esc(r.name)}" placeholder="mis. Tiket pesawat"><input aria-label="Jumlah" data-iamt inputmode="decimal" value="${r.amount?short(r.amount).replace(" ",""):""}" placeholder="0"><button type="button" class="x" data-irm aria-label="Hapus rincian">${ico("x")}</button></div>`;
   openSheet(p ? "Ubah rencana" : "Rencana baru", `
     <div class="typechips" id="ptypes">${Object.entries(PLAN_TYPES).map(([k,t])=>`<button type="button" data-ptype="${k}" aria-pressed="${k===type}">${ico(t.icon)}${t.label}</button>`).join("")}</div>
-    <div class="field"><label for="pName">Nama rencana</label><input id="pName" maxlength="40" value="${p?esc(p.name):""}" placeholder="mis. Liburan ke Bali"></div>
+    <div class="field"><label for="pName">Nama rencana</label><div class="namerow"><span id="pPrev"></span><input id="pName" maxlength="40" value="${p?esc(p.name):""}" placeholder="mis. Liburan ke Bali"></div></div>
+    ${iconGrid("pIcons")}
     <div class="twocol">
       <div class="field"><label for="pStart">Mulai</label><input type="date" id="pStart" value="${p&&p.start?p.start:""}"></div>
       <div class="field"><label for="pEnd">Selesai</label><input type="date" id="pEnd" value="${p&&p.end?p.end:""}"></div>
@@ -1305,10 +1351,16 @@ function openPlanEdit(id){
     let start = $("pStart").value || null, end = $("pEnd").value || null;
     if (start && end && end < start) [start, end] = [end, start];
     const pid = p ? p.id : "pl"+Date.now().toString(36);
-    await savePlan(pid, { name, type, start, end, items, done: p?!!p.done:false, created: p?.created || Date.now() });
+    await savePlan(pid, { name, type, icon: pickedIcon || null, start, end, items, done: p?!!p.done:false, created: p?.created || Date.now() });
     toast(p ? "Rencana diperbarui" : "Rencana dibuat");
     if (!p) setTimeout(()=>openPlan(pid), 200);
   }, p ? null : "pName");
+  let pickedIcon = p && p.icon ? p.icon : null;
+  const typeIconKey = ()=>{ const t = PLAN_TYPES[type]; return Object.keys(ICONS).find(k=>ICONS[k][0]===t.icon) || "star"; };
+  const curIcon = ()=> pickedIcon || typeIconKey();
+  const pprev = ()=>{ $("pPrev").innerHTML = icon(ICONS[curIcon()]); };
+  const predraw = wireIconGrid("pIcons", curIcon, k=>{ pickedIcon = k; pprev(); });
+  pprev();
   const box = $("irows");
   const sync = ()=>{ box.querySelectorAll("[data-row]").forEach(el=>{ const k=+el.dataset.row; rows[k].name = el.querySelector("[data-iname]").value; rows[k].amount = parseAmt(el.querySelector("[data-iamt]").value)||0; });
     $("itot").textContent = rp(rows.reduce((a,r)=>a+(r.amount||0),0)); };
@@ -1318,6 +1370,7 @@ function openPlanEdit(id){
   $("iadd").onclick = ()=>{ sync(); rows.push({name:"",amount:0}); draw(); box.lastElementChild.querySelector("input").focus(); };
   $("ptypes").querySelectorAll("[data-ptype]").forEach(b=>b.onclick=()=>{ sync(); type=b.dataset.ptype;
     $("ptypes").querySelectorAll("[data-ptype]").forEach(x=>x.setAttribute("aria-pressed", x===b));
+    if (!pickedIcon){ predraw(); pprev(); }
     if (!p && !rows.some(r=>r.amount)){ rows = PLAN_TYPES[type].items.map((n,k)=>({id:"i"+k, name:n, amount:0})); draw(); } });
   draw();
   if (p){ const d=$("pDel"); d.onclick=async()=>{ if (!(await askDelete("Hapus rencana?", `${eB(p.name)} beserta semua dana yang disisihkan dan pengeluarannya akan dihapus permanen.`, "Hapus rencana"))) return;
@@ -1330,14 +1383,14 @@ function openPlan(id){
   const st = planStats(p), w = planWhen(p, st);
   const fmtD = iso => { const d = new Date(iso+"T00:00:00"); return `${d.getDate()} ${BLN3(d.getMonth())} ${d.getFullYear()}`; };
   const byNewest = (a,b)=>b.date.localeCompare(a.date)||(b.created||0)-(a.created||0);
-  const txRow = (t, save) => `<li class="row">${save?icon(["piggy",planType(p).color]):icon(["receipt","#EB4747"])}
-      <button type="button" class="nm" data-ptx="${esc(t.id)}"><b>${esc(save ? "Dana disisihkan" : (t.note || "Pengeluaran"))}</b><small>${fmtD(t.date)}${t.note&&save?` · ${esc(t.note)}`:""} · ketuk untuk ubah</small></button>
+  const txRow = (t, save) => `<li class="row">${save?icon(["piggy",planVis(p)[1]]):icon(["receipt","#EB4747"])}
+      <button type="button" class="nm" data-ptx="${esc(t.id)}"><b>${esc(save ? "Dana disisihkan" : (t.note || "Pengeluaran"))}</b><small>${fmtD(t.date)}${t.note&&save?` · ${esc(t.note)}`:""}</small></button>
       <div class="right"><span class="amt ${save?"save":"exp"}">${save?"+":"−"}${short(t.amount)}</span>${canWrite?`<button type="button" class="del" data-pdel="${esc(t.id)}" aria-label="Hapus">${ico("trash")}</button>`:""}</div></li>`;
   const groups = [...st.items.map(i=>({ key:i.id, name:i.name, budget:i.amount })), ...(st.byItem._other ? [{ key:"_other", name:"Di luar rincian", budget:0 }] : [])];
   const itemRows = groups.map(g=>{
     const txs = st.txs.filter(t=>t.type==="exp" && (t.item||"_other")===g.key).sort(byNewest);
     const sp = txs.reduce((a,t)=>a+t.amount,0), open = planOpenItems.has(p.id+"|"+g.key);
-    const ic = g.key==="_other" ? icon(catStyle("Lainnya")) : `<span class="ic" style="--c:${planType(p).color}">${ico(planType(p).icon)}</span>`;
+    const ic = g.key==="_other" ? icon(catStyle("Lainnya")) : `<span class="ic" style="--c:${planVis(p)[1]}">${ico(planVis(p)[0])}</span>`;
     return `<div class="pitem${open?" open":""}">
       <button type="button" class="cat" data-pitem="${esc(g.key)}" aria-expanded="${open}">${ic}
         <span class="mid"><b>${esc(g.name)} <small class="muted" style="font-weight:500">· ${txs.length} catatan</small></b>${barHtml(sp, g.budget, true)}<small>${rp(sp)} / ${g.budget?rp(g.budget):"tanpa anggaran"}${g.budget&&sp>g.budget?` · lewat ${rp(sp-g.budget)}`:g.budget?` · sisa ${rp(g.budget-sp)}`:""}</small></span>
@@ -1349,9 +1402,9 @@ function openPlan(id){
   const saves = st.txs.filter(t=>t.type==="save").sort(byNewest);
   const hist = saves.map(t=>txRow(t,true)).join("");
   const advice = st.status==="done" ? "" :
-    st.budget<=st.saved ? `<div class="advice">Dana sudah <b>terkumpul penuh</b>. Tinggal catat pengeluarannya saat rencana berjalan.</div>` :
-    st.perMonth ? `<div class="advice">Kurang <b>${rp(st.budget-st.saved)}</b>. Sisihkan sekitar <b>${rp(st.perMonth)} per bulan</b> selama ${st.monthsLeft} bulan supaya cukup sebelum ${w.range.split(" – ")[0]}.</div>` :
-    `<div class="advice">Kurang <b>${rp(st.budget-st.saved)}</b> lagi dari anggaran.${p.start?"":" Isi tanggal mulai supaya ada saran nabung per bulan."}</div>`;
+    st.budget<=st.saved ? `<div class="advice">Dana <b>sudah terkumpul</b></div>` :
+    st.perMonth ? `<div class="advice">Sisihkan <b>${short(st.perMonth)}/bulan</b> · kurang ${short(st.budget-st.saved)}</div>` :
+    `<div class="advice">Kurang <b>${rp(st.budget-st.saved)}</b></div>`;
   openSheet("Rencana khusus", `
     <div class="phead">${planIcon(p,true)}<div style="min-width:0"><b>${esc(p.name)}</b><small>${w.range}</small></div><span style="margin-left:auto">${w.tag}</span></div>
     <div class="pstats">
@@ -1363,10 +1416,10 @@ function openPlan(id){
     <div style="display:grid;gap:6px">${barHtml(st.saved, st.budget)}<small class="muted" style="font-size:11.5px">${Math.round(pct(st.saved,st.budget))}% dana terkumpul</small></div>
     ${advice}
     ${canWrite?`<div class="pbtns"><button type="button" class="btn primary" id="pSave">+ Sisihkan dana</button><button type="button" class="btn ghost" id="pSpend">+ Catat pengeluaran</button></div>`:""}
-    <div class="daysec">Rincian anggaran vs realisasi · ketuk untuk lihat riwayat</div>
+    <div class="daysec">Rincian</div>
     <div style="display:grid">${itemRows}</div>
-    <div class="daysec">Riwayat dana disisihkan</div>
-    <ul class="list">${hist || `<li class="empty">Belum ada dana yang disisihkan.</li>`}</ul>
+    <div class="daysec">Dana disisihkan</div>
+    <ul class="list">${hist || `<li class="empty">Belum ada.</li>`}</ul>
     ${canWrite?`<div class="actions"><button type="button" class="btn ghost" id="pEdit">Ubah rencana & rincian</button><button type="button" class="btn ghost" id="pDone">${p.done?"Aktifkan lagi":"Tandai selesai"}</button></div>`:""}
   `, null);
   sheet.querySelectorAll("[data-pitem]").forEach(b=>b.onclick=()=>{ const k = p.id+"|"+b.dataset.pitem;
@@ -1394,7 +1447,7 @@ function openPlanTx(planId, kind, existing=null, preset={}){
       <button type="button" id="ptSave" aria-pressed="${type==="save"}">Sisihkan dana</button>
       <button type="button" id="ptExp" aria-pressed="${type==="exp"}">Pengeluaran</button>
     </div>
-    <p class="muted" style="margin:0;font-size:12.5px" id="ptHelp"></p>
+    <p hidden id="ptHelp"></p>
     ${amountField("ptAmt","Jumlah", existing?String(existing.amount):(preset.amount?String(preset.amount):""), [100000,250000,500000,1000000])}
     <div class="twocol">
       <div class="field" id="ptItemF"><label for="ptItem">Rincian</label><select id="ptItem" data-plan="${esc(p.id)}">${itemOpts(existing?(existing.item||"_other"):(preset.item || (p.items||[])[0]?.id))}</select></div>
@@ -1437,20 +1490,20 @@ function openReport(){
   const list = all.filter(e => reportFilter==="all" ? true : reportFilter==="plan" ? e.kind==="plan" : e.kind!=="plan");
   const groups = {}; list.forEach(e=>{ (groups[e.date] ||= []).push(e); });
   const listHtml = Object.keys(groups).sort().reverse().map(d=>`<div class="daygrp">${dayLabel(d)}</div><ul class="list">${groups[d].map(e=>`<li class="row">${entryIcon(e)}<div class="nm"><b>${esc(e.title)}<span class="kind${e.kind==="plan"?" k":""}">${e.kind==="plan"?"Khusus":"Bulanan"}</span></b><small>${esc(e.sub)}</small></div><div class="right"><span class="amt ${e.type}">${e.type==="inc"?"+":e.type==="save"?"→ ":"−"}${short(e.amount)}</span></div></li>`).join("")}</ul>`).join("")
-    || `<div class="empty">Tidak ada catatan untuk pilihan ini.</div>`;
+    || `<div class="empty">Tidak ada catatan.</div>`;
   openSheet(`Laporan ${c.info.label}`, `
-    <div class="rtotal"><small>Total pengeluaran<br>bulanan + rencana khusus</small><b>${rp(totalOut)}</b></div>
+    <div class="rtotal"><small>Total keluar</small><b>${rp(totalOut)}</b></div>
     <div class="rsum">
       <div class="stat"><small>Pemasukan</small><b class="down">${rp(c.income)}</b></div>
       <div class="stat"><small>Pengeluaran bulanan</small><b class="up">${rp(c.spent)}</b></div>
-      <div class="stat"><small>Pengeluaran rencana khusus</small><b class="up">${rp(planExp)}</b></div>
-      <div class="stat"><small>Disisihkan ke rencana</small><b style="color:var(--primary)">${rp(saved)}</b></div>
+      <div class="stat"><small>Pengeluaran rencana</small><b class="up">${rp(planExp)}</b></div>
+      <div class="stat"><small>Disisihkan</small><b style="color:var(--primary)">${rp(saved)}</b></div>
     </div>
-    <div class="advice">Sisa uang bulanan <b>${rp(c.income - c.spent - saved)}</b>. Pengeluaran rencana khusus dibayar dari dana yang sudah disisihkan, jadi tidak mengurangi kas bulanan.</div>
-    <div class="daysec">Pengeluaran bulanan per kategori</div>
-    <div style="display:grid">${mrows.map(([k,v,st])=>catRow(icon(st,true), k, v, "")).join("") || `<div class="empty">Belum ada pengeluaran bulanan.</div>`}</div>
-    <div class="daysec">Pengeluaran rencana khusus</div>
-    <div style="display:grid">${prows.map(([p,v])=>catRow(planIcon(p,true), p.name, v, "")).join("") || `<div class="empty">Tidak ada pengeluaran rencana khusus bulan ini.</div>`}</div>
+    <div class="advice">Sisa uang bulanan <b>${rp(c.income - c.spent - saved)}</b></div>
+    <div class="daysec">Bulanan</div>
+    <div style="display:grid">${mrows.map(([k,v,st])=>catRow(icon(st,true), k, v, "")).join("") || `<div class="empty">Tidak ada.</div>`}</div>
+    <div class="daysec">Rencana</div>
+    <div style="display:grid">${prows.map(([p,v])=>catRow(planIcon(p,true), p.name, v, "")).join("") || `<div class="empty">Tidak ada.</div>`}</div>
     <div class="daysec">Semua catatan</div>
     <div class="seg" role="group" aria-label="Saring catatan">
       <button type="button" data-rf="all" aria-pressed="${reportFilter==="all"}">Semua</button>
@@ -1465,7 +1518,8 @@ function openReport(){
 function openBill(id){
   const b = id ? S.bills.find(x=>x.id===id) : null;
   openSheet(b?"Ubah tagihan":"Tagihan baru", `
-    <div class="field"><label for="bName">Nama tagihan</label><input id="bName" maxlength="40" value="${b?esc(b.name):""}" placeholder="mis. Iuran sampah"></div>
+    <div class="field"><label for="bName">Nama tagihan</label><div class="namerow"><span id="bPrev"></span><input id="bName" maxlength="40" value="${b?esc(b.name):""}" placeholder="mis. Iuran sampah"></div></div>
+    ${iconGrid("bIcons")}
     ${amountField("bAmt","Rencana per bulan", b? String(b.amount):"")}
     <div class="field"><label for="bDue">Jatuh tempo (tanggal)</label><input id="bDue" type="number" min="1" max="31" inputmode="numeric" value="${b&&b.dueDay?b.dueDay:""}" placeholder="opsional, 1–31"></div>
     <div class="actions"><button type="submit" class="btn primary">Simpan</button>${b?`<button type="button" class="btn danger" id="bDel">Hapus tagihan</button>`:""}</div>
@@ -1473,10 +1527,16 @@ function openBill(id){
     const name = $("bName").value.trim(); if (!name){ $("bName").focus(); return false; }
     const amount = readAmount("bAmt"); if (!amount) return false;
     const due = parseInt($("bDue").value,10);
-    await saveBill(b ? b.id : "b"+Date.now().toString(36), { name, amount, dueDay: due>=1&&due<=31 ? due : null, order: b ? (b.order??99) : S.bills.length+1 });
+    await saveBill(b ? b.id : "b"+Date.now().toString(36), { name, amount, icon: pickedIcon || billGuess(name), dueDay: due>=1&&due<=31 ? due : null, order: b ? (b.order??99) : S.bills.length+1 });
     toast(b ? "Tagihan diperbarui" : "Tagihan ditambahkan");
   }, b ? null : "bName");
   wireAmount("bAmt");
+  let pickedIcon = b && b.icon ? b.icon : null;
+  const curIcon = ()=> pickedIcon || billGuess($("bName").value);
+  const prev = ()=>{ $("bPrev").innerHTML = icon(ICONS[curIcon()]); };
+  const redraw = wireIconGrid("bIcons", curIcon, k=>{ pickedIcon = k; prev(); });
+  $("bName").addEventListener("input", ()=>{ if (!pickedIcon){ redraw(); prev(); } });
+  prev();
   if (b){ const del=$("bDel"); del.onclick=async()=>{ if (!(await askDelete("Hapus tagihan?", `${eB(b.name)} tidak akan muncul lagi di tagihan bulanan.`, "Hapus tagihan"))) return;
     try { await deleteBill(b.id); closeSheet(); toast("Tagihan dihapus"); } catch(e){ fail(e); } }; }
 }
@@ -1511,14 +1571,14 @@ function openDay(iso){
   const delBtn = attr => canWrite ? `<button type="button" class="del" ${attr}>${ico("trash")}Hapus</button>` : "";
   const plan = [
     ...dd.dues.map(b=>{ const v=c.paid[b.id];
-      return `<li class="row">${icon(billStyle(b.name))}<div class="nm"><b>${esc(b.name)}</b><small>Jatuh tempo · rencana ${short(b.amount)}</small></div>
+      return `<li class="row">${icon(billIcon(b))}<div class="nm"><b>${esc(b.name)}</b><small>Jatuh tempo · rencana ${short(b.amount)}</small></div>
         <div class="right">${v!=null?`<span class="amt">${rp(realOf(v))}</span><span class="pill ok">Lunas</span>`:(canWrite?`<button type="button" class="btn-s" data-payday="${esc(b.id)}">Bayar</button>`:`<span class="amt">${rp(b.amount)}</span>`)}</div></li>`; }),
     c.weekly && week ? `<li class="row">${icon(catStyle(GROC))}<div class="nm"><b>Belanja minggu ${week.label}</b><small>Anggaran ${short(c.weekly)} · terpakai ${short(weekSpent)}</small></div>
         <div class="right"><span class="amt ${weekLeft<0?"exp":""}">${rp(Math.abs(weekLeft))}</span><span class="diff ${weekLeft<0?"up":"down"}">${weekLeft<0?"melebihi":"tersisa"}</span></div></li>` : ""
   ].join("");
   const real = [
     ...dd.paidBills.map(b=>{ const r=realOf(c.paid[b.id]), diff=r-b.amount;
-      return `<li class="row">${icon(billStyle(b.name))}<button type="button" class="nm" data-payday="${esc(b.id)}"><b>${esc(b.name)}</b><small>Tagihan dibayar · ketuk untuk ubah</small></button>
+      return `<li class="row">${icon(billIcon(b))}<button type="button" class="nm" data-payday="${esc(b.id)}"><b>${esc(b.name)}</b><small>Tagihan</small></button>
         <div class="right"><span class="amt exp">−${short(r)}</span>${diff?`<span class="diff ${diff>0?"up":"down"}">${diff>0?"+":"−"}${short(Math.abs(diff))} dari rencana</span>`:""}${delBtn(`data-dayunpay="${esc(b.id)}"`)}</div></li>`; }),
     ...[...dd.exp, ...dd.inc].map(t=>{ const inc=t.type==="inc";
       return `<li class="row">${icon(catStyle(t.category))}<button type="button" class="nm" data-daytx="${esc(t.id)}"><b>${esc(t.note||t.category)}</b><small>${esc(t.note?t.category:(inc?"Pemasukan":"Pengeluaran"))}</small></button>
@@ -1526,9 +1586,9 @@ function openDay(iso){
   ].join("");
   openSheet(`${HARI[dt.getDay()]}, ${dt.getDate()} ${BULAN[dt.getMonth()]}`, `
     <div class="daysec">Rencana</div>
-    <ul class="list">${plan || `<li class="empty">Tidak ada tagihan jatuh tempo di tanggal ini.</li>`}</ul>
+    <ul class="list">${plan || `<li class="empty">Tidak ada jatuh tempo.</li>`}</ul>
     <div class="daysec">Realisasi</div>
-    <ul class="list">${real || `<li class="empty">Belum ada pengeluaran di tanggal ini.</li>`}</ul>
+    <ul class="list">${real || `<li class="empty">Belum ada pengeluaran.</li>`}</ul>
     <div class="planline"><span>Total keluar hari ini</span><b>${rp(dd.total)}</b></div>
     ${canWrite?`<div class="actions"><button type="button" class="btn primary" id="dayAdd">+ Catat di tanggal ini</button></div>`:""}
   `, null);
@@ -1545,7 +1605,7 @@ function openDay(iso){
 
 function openAmountSetting(title, note, current, chips, save, clearLabel, onClear){
   openSheet(title, `
-    ${note?`<p style="margin:0;font-size:13px" class="muted">${note}</p>`:""}
+    
     ${amountField("setAmt","Jumlah", current?String(current):"", chips)}
     <div class="actions"><button type="submit" class="btn primary">Simpan</button>${clearLabel?`<button type="button" class="btn danger" id="setClear">${clearLabel}</button>`:""}</div>
   `, async ()=>{ const n = readAmount("setAmt"); if (!n) return false; await save(n); }, "setAmt");
@@ -1565,7 +1625,7 @@ const openGroc = () => openAmountSetting("Anggaran belanja mingguan", "Berlaku u
 function openCatBudget(cat){
   if (!cat){
     const cb = S.settings.catBudgets || {};
-    openSheet("Anggaran per kategori", `<p style="margin:0;font-size:13px" class="muted">Batas pengeluaran per bulan. Pilih kategori untuk mengatur.</p>
+    openSheet("Anggaran per kategori", `
       <div class="card" style="box-shadow:none;padding:0;gap:0">${BUDGETABLE.map(k=>`<button type="button" class="set" data-pickcat="${esc(k)}">${icon(catStyle(k),true)}<span><b>${esc(k)}</b><small>${cb[k]?"per bulan":"belum ada batas"}</small></span><span class="val">${cb[k]?short(cb[k]):"Atur"}</span></button>`).join("")}</div>`, null);
     sheet.querySelectorAll("[data-pickcat]").forEach(b=>b.onclick=()=>openCatBudget(b.dataset.pickcat));
     return;
