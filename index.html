@@ -426,7 +426,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
     </section>
 
     <section class="sec">
-      <div class="sec-h"><h2>Minggu ini</h2><button class="link" data-go="anggaran" data-anchor="kalender">Kalender</button></div>
+      <div class="sec-h"><h2>Belanja</h2><button class="link" data-go="anggaran" data-anchor="kalender">Kalender</button></div>
       <div class="card" id="homeGroc"></div>
     </section>
 
@@ -501,7 +501,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
     <section class="sec">
       <div class="sec-h"><h2>Anggaran</h2></div>
       <div class="card" style="gap:0">
-        <button class="set" id="setGroc2"><span class="ic solid" style="--c:var(--purple)">ICON_CART</span><span><b>Belanja mingguan</b></span><span class="val" id="valGroc">—</span></button>
+        <button class="set" id="setGroc2"><span class="ic solid" style="--c:var(--purple)">ICON_CART</span><span><b>Belanja mingguan</b><small>per bulan</small></span><span class="val" id="valGroc">—</span></button>
         <button class="set" data-go="anggaran" data-anchor="tagihan"><span class="ic solid" style="--c:var(--primary)">ICON_RECEIPT</span><span><b>Tagihan</b><small id="subBills"></small></span><span class="val" id="valBills">—</span></button>
         <button class="set" id="addCatBudget2"><span class="ic solid" style="--c:var(--orange)">ICON_PIE</span><span><b>Anggaran kategori</b></span><span class="val" id="valCats">—</span></button>
       </div>
@@ -890,6 +890,8 @@ function planWhen(p, st){
 const realOf = v => v==null ? 0 : (typeof v==="number" ? v : Number(v.amount)||0);
 const paidDateOf = v => (v && typeof v==="object" && v.date) ? v.date : null;
 const incomeBase = () => S.month.income != null ? Number(S.month.income)||0 : Number(S.settings.income)||0;
+/* grocery budget is one monthly amount (older data stored a weekly amount) */
+const grocMonthly = () => Number(S.settings.monthlyGrocery) || (Number(S.settings.weeklyGrocery)||0) * 4;
 function calc(){
   const info = monthInfo(ym);
   const paid = S.month.paid || {};
@@ -898,9 +900,7 @@ function calc(){
   const paidPlan = S.bills.filter(b=>paid[b.id]!=null).reduce((a,b)=>a+(b.amount||0),0);
   const exp = S.tx.filter(t=>t.type!=="inc");
   const txInc = S.tx.filter(t=>t.type==="inc").reduce((a,t)=>a+t.amount,0);
-  const weekly = Number(S.settings.weeklyGrocery)||0;
-  const grocWeeks = weeksOf(ym).filter(w=>w.own).length;
-  const grocBudget = weekly * grocWeeks;
+  const grocBudget = grocMonthly();
   const byCat = {}; exp.forEach(t=>{ byCat[t.category]=(byCat[t.category]||0)+t.amount; });
   const grocSpent = byCat[GROC]||0;
   const catBudgets = S.settings.catBudgets || {};
@@ -911,7 +911,7 @@ function calc(){
   const plan = billsTotal + grocBudget + otherBudget;
   const savedMonth = S.planTx.filter(t=>t.type==="save" && t.month===ym).reduce((a,t)=>a+t.amount,0);
   const projected = income - savedMonth - (paidTotal + (billsTotal - paidPlan) + Math.max(grocBudget, grocSpent) + otherCommitted);
-  return { info, paid, billsTotal, paidTotal, paidPlan, weekly, grocWeeks, grocBudget, grocSpent, byCat, catBudgets, income, spent, plan, projected, exp, savedMonth };
+  return { info, paid, billsTotal, paidTotal, paidPlan, grocBudget, grocSpent, byCat, catBudgets, income, spent, plan, projected, exp, savedMonth };
 }
 function dayData(iso, c){
   const days = monthInfo(ym).days, inMonth = iso.slice(0,7)===ym, d = +iso.slice(8,10);
@@ -1078,16 +1078,16 @@ function renderHome(c){
     : `<li class="empty">Belum ada tagihan.</li>`;
 
   // groceries this week
-  if (!c.weekly){
+  if (!c.grocBudget){
     $("homeGroc").innerHTML = `<div class="empty">Anggaran belanja belum diatur.</div>`;
   } else {
-    const {w, spent} = weekNow(c), sisa = c.weekly - spent;
+    const spent = c.grocSpent, sisa = c.grocBudget - spent;
     $("homeGroc").innerHTML = `
       <div class="row" style="border:0;padding:0">${icon(catStyle(GROC), true)}
-        <div class="nm"><b>${w.label}</b><small>${rp(spent)} dari ${rp(c.weekly)}</small></div>
+        <div class="nm"><b>${GROC}</b><small>${rp(spent)} dari ${rp(c.grocBudget)}</small></div>
         ${canWrite?`<button type="button" class="btn-s" data-quickgroc>+ Catat</button>`:""}</div>
-      ${barHtml(spent, c.weekly)}
-      <div style="display:flex;justify-content:space-between;font-size:12px"><span class="muted">${Math.round(pct(spent,c.weekly))}% terpakai</span><b class="${sisa<0?"up":""}">${sisa<0?"Lewat "+rp(-sisa):"Sisa "+rp(sisa)}</b></div>`;
+      ${barHtml(spent, c.grocBudget)}
+      <div style="display:flex;justify-content:space-between;font-size:12px"><span class="muted">${Math.round(pct(spent,c.grocBudget))}% terpakai</span><b class="${sisa<0?"up":""}">${sisa<0?"Lewat "+rp(-sisa):"Sisa "+rp(sisa)}</b></div>`;
   }
   $("homeDonut").innerHTML = donutHtml(c);
   const es = entries(c).slice(0,5);
@@ -1145,7 +1145,7 @@ function renderBudget(c){
     <div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;flex-wrap:wrap"><span class="muted">${used}% terpakai</span><b class="${sisa<0?"up":"down"}">${sisa<0?"Lewat "+rp(-sisa):"Sisa "+rp(sisa)}</b></div>
     <div class="stats">
       <div class="stat"><small>Tagihan</small><b>${short(c.billsTotal)}</b></div>
-      <div class="stat"><small>Belanja ${c.grocWeeks} mgg</small><b>${short(c.grocBudget)}</b></div>
+      <div class="stat"><small>Belanja</small><b>${short(c.grocBudget)}</b></div>
       <div class="stat"><small>Kategori lain</small><b>${short(c.plan-c.billsTotal-c.grocBudget)}</b></div>
     </div>
     ${c.savedMonth ? `<div class="advice">Disisihkan <b>${rp(c.savedMonth)}</b></div>` : ""}`;
@@ -1164,9 +1164,6 @@ function renderBudget(c){
       grid += `<button type="button" class="day${i===6?" sun":""}${iso===todayISO?" today":""}${out?" out":""}" data-day="${iso}" style="${heat}" aria-label="${d} ${BULAN[+iso.slice(5,7)-1]}${tot?`, keluar ${rp(tot)}`:""}">
         <span class="n">${d}</span><span class="v">${tot?short(tot).replace(" ",""):""}</span><span class="dots">${dots}</span></button>`;
     });
-    grid += c.weekly
-      ? `<div class="wk${w.isos.includes(todayISO)?" cur":""}${w.own?"":" other"}"><span>${w.label}</span>${barHtml(w.spent,c.weekly,true)}<span><b>${short(w.spent)}</b> / ${short(c.weekly)}</span></div>`
-      : `<div class="wk"><span>${w.label}</span><span></span><span>keluar <b>${short(w.isos.reduce((a,iso)=>a+dd[iso].total,0))}</b></span></div>`;
   });
   $("cal").innerHTML = `<div class="cal">${grid}</div>
     <div class="legend-row"><span><i style="background:color-mix(in srgb,var(--red) 25%,#fff)"></i>Ada pengeluaran</span><span><i style="background:var(--primary)"></i>Jatuh tempo</span><span><i style="background:var(--green)"></i>Lunas</span><span><i style="background:var(--red)"></i>Telat</span></div>`;
@@ -1205,7 +1202,7 @@ function renderProfile(c){
   $("lblIncomeMonth").textContent = c.info.label;
   $("valIncomeMonth").textContent = incomeBase() ? short(incomeBase()) : "Atur";
   $("subIncomeMonth").textContent = S.month.income!=null ? "Khusus bulan ini" : "";
-  $("valGroc").textContent = c.weekly ? short(c.weekly) : "Atur";
+  $("valGroc").textContent = c.grocBudget ? short(c.grocBudget) : "Atur";
   $("valBills").textContent = short(c.billsTotal);
   $("subBills").textContent = `${S.bills.length} tagihan`;
   const n = BUDGETABLE.filter(k=>Number(c.catBudgets[k])>0).length;
@@ -1691,14 +1688,14 @@ function openDay(iso){
   const c = calc(), dd = dayData(iso, c), dt = new Date(iso+"T00:00:00");
   const week = weeksOf(ym).find(w=>w.isos.includes(iso));
   const weekSpent = week ? S.txAll.filter(t=>t.type!=="inc" && t.category===GROC && week.isos.includes(t.date)).reduce((a,t)=>a+t.amount,0) : 0;
-  const weekLeft = c.weekly - weekSpent;
+  const grocLeft = c.grocBudget - c.grocSpent;
   const delBtn = attr => canWrite ? `<button type="button" class="del" ${attr}>${ico("trash")}Hapus</button>` : "";
   const plan = [
     ...dd.dues.map(b=>{ const v=c.paid[b.id];
       return `<li class="row">${icon(billIcon(b))}<div class="nm"><b>${esc(b.name)}</b><small>Jatuh tempo · rencana ${short(b.amount)}</small></div>
         <div class="right">${v!=null?`<span class="amt">${rp(realOf(v))}</span><span class="pill ok">Lunas</span>`:(canWrite?`<button type="button" class="btn-s" data-payday="${esc(b.id)}">Bayar</button>`:`<span class="amt">${rp(b.amount)}</span>`)}</div></li>`; }),
-    c.weekly && week ? `<li class="row">${icon(catStyle(GROC))}<div class="nm"><b>Belanja minggu ${week.label}</b><small>Anggaran ${short(c.weekly)} · terpakai ${short(weekSpent)}</small></div>
-        <div class="right"><span class="amt ${weekLeft<0?"exp":""}">${rp(Math.abs(weekLeft))}</span><span class="diff ${weekLeft<0?"up":"down"}">${weekLeft<0?"melebihi":"tersisa"}</span></div></li>` : ""
+    c.grocBudget ? `<li class="row">${icon(catStyle(GROC))}<div class="nm"><b>${GROC}</b><small>Anggaran ${short(c.grocBudget)} · terpakai ${short(c.grocSpent)}</small></div>
+        <div class="right"><span class="amt ${grocLeft<0?"exp":""}">${rp(Math.abs(grocLeft))}</span><span class="diff ${grocLeft<0?"up":"down"}">${grocLeft<0?"melebihi":"tersisa"}</span></div></li>` : ""
   ].join("");
   const real = [
     ...dd.paidBills.map(b=>{ const r=realOf(c.paid[b.id]), diff=r-b.amount;
@@ -1744,8 +1741,8 @@ const openIncomeMonth = () => openAmountSetting(`Pemasukan ${monthInfo(ym).label
 const openIncomeDefault = () => openAmountSetting("Pemasukan rutin per bulan",
   "Dipakai otomatis untuk setiap bulan, kecuali bulan yang Anda ubah sendiri.",
   S.settings.income, null, async n=>{ await saveSettings({income:n}); toast("Pemasukan rutin disimpan"); });
-const openGroc = () => openAmountSetting("Anggaran belanja mingguan", "Berlaku untuk setiap minggu Senin–Minggu.",
-  S.settings.weeklyGrocery, [750000,1000000,1250000,1500000], async n=>{ await saveSettings({weeklyGrocery:n}); toast("Anggaran belanja disimpan"); });
+const openGroc = () => openAmountSetting("Belanja mingguan · per bulan", "",
+  grocMonthly() || "", [3000000,3600000,4000000,4500000,5000000], async n=>{ await saveSettings({monthlyGrocery:n}); toast("Anggaran belanja disimpan"); });
 function openCatBudget(cat){
   if (!cat){
     const cb = S.settings.catBudgets || {};
