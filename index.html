@@ -140,6 +140,11 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .ov-legend b{font-size:13px;font-weight:800}
 .ov-foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;border-top:1px solid var(--line);padding-top:10px}
 
+/* show-more button */
+.morebtn{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;border:0;background:none;color:var(--primary);font-weight:600;font-size:13px;padding:10px 0 4px}
+.morebtn svg{width:16px;height:16px;transition:transform .2s}
+.morebtn svg.up{transform:rotate(180deg)}
+
 /* overview type toggle */
 .seg.ovtog{box-shadow:none;background:var(--sunk);padding:3px;margin-bottom:4px}
 .seg.ovtog button{padding:7px 6px;font-size:12.5px}
@@ -395,7 +400,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .famopt{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 2px;border:0;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left}
 
 /* personal / family switch */
-.seg.spacesw{flex:0 0 100%;max-width:250px;margin:8px auto 2px;padding:3px}
+.seg.spacesw{max-width:250px;margin:0 auto 14px;padding:3px}
 .seg.spacesw button{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 6px;font-size:12.5px}
 .seg.spacesw svg{width:16px;height:16px}
 
@@ -424,11 +429,11 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
       <span id="monthLbl"></span>
       <button id="nextM" aria-label="Bulan berikutnya"><svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
-    <div class="seg two spacesw" id="spaceSw" role="group" aria-label="Ruang" hidden>
+  </header>
+  <div class="seg two spacesw" id="spaceSw" role="group" aria-label="Ruang" hidden>
       <button type="button" data-space="personal" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Personal</button>
       <button type="button" data-space="family" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></svg>Keluarga</button>
-    </div>
-  </header>
+  </div>
   <div class="notice" id="notice" hidden></div>
 
   <!-- BERANDA -->
@@ -1055,6 +1060,7 @@ function spendIn(isoTest){
     const d = paidDateOf(v); if (d && isoTest(d)) by[BILLCAT]=(by[BILLCAT]||0)+realOf(v); }));
   return by;
 }
+let homeBillsAll = false;
 let ovPeriod = "month", ovType = "exp";
 /* income by category for a set of dates: main income on payday + income transactions */
 function incomeIn(isoTest, monthsMain){
@@ -1151,8 +1157,9 @@ function renderHome(c){
 
   // bills: unpaid first
   const bills = [...S.bills].sort((a,b)=> (c.paid[a.id]!=null) - (c.paid[b.id]!=null));
-  $("homeBills").innerHTML = bills.length ? bills.slice(0,4).map(b=>billRow(b,c,false)).join("") +
-    (bills.length>4 ? `<li class="empty" style="text-align:center">+${bills.length-4} lainnya</li>` : "")
+  const shown = homeBillsAll ? bills : bills.slice(0,4);
+  $("homeBills").innerHTML = bills.length ? shown.map(b=>billRow(b,c,false)).join("") +
+    (bills.length>4 ? `<li><button type="button" class="morebtn" data-morebills>${homeBillsAll ? "Sembunyikan" : `+${bills.length-4} lainnya`}${ico("chevDown", "i"+(homeBillsAll?" up":""))}</button></li>` : "")
     : `<li class="empty">Belum ada tagihan.</li>`;
 
   // groceries this week
@@ -1885,6 +1892,7 @@ $("setPayday").onclick=openPayday;
 $("addCatBudget").onclick=()=>openCatBudget(); $("addCatBudget2").onclick=()=>openCatBudget();
 $("setName").onclick=openName;
 $("ovPeriod").addEventListener("change", e=>{ ovPeriod = e.target.value; render(); });
+document.addEventListener("click", e=>{ if (e.target.closest("[data-morebills]")){ homeBillsAll = !homeBillsAll; render(); } });
 document.addEventListener("click", e=>{ const b = e.target.closest("[data-ovt]"); if (b){ ovType = b.dataset.ovt; render(); } });
 enhanceSelect($("ovPeriod"), { chip:true, title:"Periode ringkasan" });
 $("txSearch").addEventListener("input", e=>{ txQuery = e.target.value; render(); });
