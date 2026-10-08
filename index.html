@@ -246,6 +246,16 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .phead small{color:var(--muted);font-size:12px}
 .pstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .pbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mbtools{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.budempty{display:grid;justify-items:center;gap:10px;text-align:center;padding:8px 4px}
+.budempty .ic{width:46px;height:46px;border-radius:15px}
+.budempty b{font-size:15px}
+.budempty small{color:var(--muted);font-size:12.5px}
+.budempty .btn{width:auto;padding:12px 26px}
+.pullcard{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:0;text-align:left;background:var(--primary-soft);border-radius:18px;padding:12px 14px;width:100%;color:var(--ink)}
+.pullcard small{display:block;color:var(--muted);font-size:12px}
+.pullcard .go{font-weight:700;font-size:13px;color:var(--primary)}
+.tplsum{display:grid;gap:0}
 .advice{background:var(--primary-soft);border-radius:14px;padding:10px 12px;font-size:12.5px;color:var(--ink)}
 .advice b{color:var(--primary)}
 .forplan{display:grid;gap:6px}
@@ -482,6 +492,8 @@ button.wallet.spin svg{animation:spin 1s linear infinite}
       </div>
     </section>
 
+    <div id="homePull" hidden></div>
+
     <button type="button" class="reportbtn" data-report><span class="ic solid" style="--c:var(--primary)"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/></svg></span><span><b id="reportLbl">Laporan bulan ini</b></span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
 
     <section class="sec">
@@ -584,7 +596,7 @@ button.wallet.spin svg{animation:spin 1s linear infinite}
     <section class="sec">
       <div class="sec-h"><h2>Pemasukan</h2></div>
       <div class="card" style="gap:0">
-        <button class="set" id="setIncomeDefault"><span class="ic solid" style="--c:var(--green)">ICON_WALLET</span><span><b>Pemasukan rutin</b></span><span class="val" id="valIncomeDefault">—</span></button>
+        <button class="set" id="setIncomeDefault"><span class="ic solid" style="--c:var(--green)">ICON_WALLET</span><span><b>Pemasukan rutin</b><small>untuk template</small></span><span class="val" id="valIncomeDefault">—</span></button>
         <button class="set" id="setPayday"><span class="ic solid" style="--c:var(--blue)">ICON_CAL</span><span><b>Tanggal gajian</b></span><span class="val" id="valPayday">—</span></button>
         <button class="set" id="setIncomeMonth"><span class="ic solid" style="--c:var(--teal)">ICON_CAL</span><span><b><span id="lblIncomeMonth"></span></b><small id="subIncomeMonth"></small></span><span class="val" id="valIncomeMonth">—</span></button>
       </div>
@@ -596,6 +608,7 @@ button.wallet.spin svg{animation:spin 1s linear infinite}
         <button class="set" id="setGroc2"><span class="ic solid" style="--c:var(--purple)">ICON_CART</span><span><b>Belanja mingguan</b><small>per bulan</small></span><span class="val" id="valGroc">—</span></button>
         <button class="set" data-go="anggaran" data-anchor="tagihan"><span class="ic solid" style="--c:var(--primary)">ICON_RECEIPT</span><span><b>Tagihan</b><small id="subBills"></small></span><span class="val" id="valBills">—</span></button>
         <button class="set" id="addCatBudget2"><span class="ic solid" style="--c:var(--orange)">ICON_PIE</span><span><b>Anggaran kategori</b></span><span class="val" id="valCats">—</span></button>
+        <button class="set" id="setTpl"><span class="ic solid" style="--c:var(--blue)">ICON_RECEIPT</span><span><b>Template anggaran</b></span><span class="val" id="valTpl">—</span></button>
       </div>
     </section>
 
@@ -1007,7 +1020,7 @@ const paidDateOf = v => (v && typeof v==="object" && v.date) ? v.date : null;
 function effAt(hist, m, base){ let v = base, k0 = ""; Object.keys(hist||{}).forEach(k=>{ if (k<=m && k>k0){ k0 = k; v = hist[k]; } }); return v; }
 function histFrom(hist, m, v){ const h = {}; Object.entries(hist||{}).forEach(([k,x])=>{ if (k<m) h[k] = x; }); h[m] = v; return h; }
 const incomeDefault = (m=ym) => Number(effAt(S.settings.incomeHist, m, Number(S.settings.income)||0))||0;
-const incomeBase = () => S.month.income != null ? Number(S.month.income)||0 : incomeDefault(ym);
+const incomeBase = () => S.month.income != null ? Number(S.month.income)||0 : V2() ? Number((S.month.budget||{}).income)||0 : incomeDefault(ym);
 /* grocery budget is one monthly amount (older data stored a weekly amount) */
 const grocMonthly = (m=ym) => Number(effAt(S.settings.grocHist, m, Number(S.settings.monthlyGrocery) || (Number(S.settings.weeklyGrocery)||0) * 4))||0;
 /* category budgets: each history entry is the full map for that month on ("_" keeps an emptied map from vanishing) */
@@ -1018,13 +1031,28 @@ function billFrom(b){
   const m = /^b([0-9a-z]{7,9})$/.exec(b.id||""); if (!m) return null;
   const ts = parseInt(m[1],36); return ts > 1.6e12 && ts < 2.2e12 ? ymOf(new Date(ts)) : null;
 }
+/* Each month keeps its own budget in months/<ym>/budget = { v, bills:{id:{…}}, groc, cats, income }.
+   A month without one starts empty and is filled by pulling another month or the template (settings.template).
+   budgetV2 marks a family whose older shared lists have been copied into the months that used them. */
+const V2 = () => !!S.settings.budgetV2;
+function legacySnap(m, doc){
+  const bills = {};
+  billsFor(m, (doc||{}).paid).forEach(b=>{ bills[b.id] = clean({ name:b.name, amount:b.amount, icon:b.icon, dueDay:b.dueDay||undefined, order:b.order??99 }); });
+  return { v:1, bills, groc: grocMonthly(m), cats: { _:0, ...catBudgetsAt(m) }, income: incomeDefault(m) };
+}
+const monthBudget = () => V2() ? (S.month.budget || null) : legacySnap(ym, S.month);
+const budBills = bud => Object.entries((bud && bud.bills) || {}).map(([id,b])=>({ id, ...b, amount:Number(b.amount)||0 })).sort(sortBills);
+const budCats = bud => { const o = { ...((bud && bud.cats) || {}) }; delete o._; return o; };
+const budTotal = bud => !bud ? 0 : budBills(bud).reduce((a,b)=>a+b.amount,0) + (Number(bud.groc)||0) + Object.values(budCats(bud)).reduce((a,v)=>a+(Number(v)||0),0);
+const budFilled = bud => !!bud && (budBills(bud).length>0 || Number(bud.groc)>0 || Object.values(budCats(bud)).some(v=>v>0));
 function billsFor(m, paid){
   return S.billsRaw.filter(b=>{ const f = billFrom(b);
     return ((!f || f<=m) && (!b.until || m<=b.until)) || (paid && paid[b.id]!=null); })
     .map(b=>({ ...b, amount: Number(effAt(b.amounts, m, b.amount))||0 }));
 }
 function calc(){
-  S.bills = billsFor(ym, S.month.paid);
+  const bud = monthBudget();
+  S.bills = budBills(bud);
   const info = monthInfo(ym);
   const paid = S.month.paid || {};
   const billsTotal = S.bills.reduce((a,b)=>a+(b.amount||0),0);
@@ -1032,10 +1060,10 @@ function calc(){
   const paidPlan = S.bills.filter(b=>paid[b.id]!=null).reduce((a,b)=>a+(b.amount||0),0);
   const exp = S.tx.filter(t=>t.type!=="inc");
   const txInc = S.tx.filter(t=>t.type==="inc").reduce((a,t)=>a+t.amount,0);
-  const grocBudget = grocMonthly();
+  const grocBudget = bud ? Number(bud.groc)||0 : 0;
   const byCat = {}; exp.forEach(t=>{ byCat[t.category]=(byCat[t.category]||0)+t.amount; });
   const grocSpent = byCat[GROC]||0;
-  const catBudgets = catBudgetsAt(ym);
+  const catBudgets = budCats(bud);
   const otherBudget = BUDGETABLE.reduce((a,k)=>a+(Number(catBudgets[k])||0),0);
   const otherCommitted = BUDGETABLE.reduce((a,k)=>a+Math.max(Number(catBudgets[k])||0, byCat[k]||0),0);
   const income = incomeBase() + txInc;
@@ -1043,7 +1071,7 @@ function calc(){
   const plan = billsTotal + grocBudget + otherBudget;
   const savedMonth = S.planTx.filter(t=>t.type==="save" && t.month===ym).reduce((a,t)=>a+t.amount,0);
   const projected = income - savedMonth - (paidTotal + (billsTotal - paidPlan) + Math.max(grocBudget, grocSpent) + otherCommitted);
-  return { info, paid, billsTotal, paidTotal, paidPlan, grocBudget, grocSpent, byCat, catBudgets, income, spent, plan, projected, exp, savedMonth };
+  return { bud, hasBudget: !!bud || (mode==='cloud' && !S._monthLoaded), info, paid, billsTotal, paidTotal, paidPlan, grocBudget, grocSpent, byCat, catBudgets, income, spent, plan, projected, exp, savedMonth };
 }
 function dayData(iso, c){
   const days = monthInfo(ym).days, inMonth = iso.slice(0,7)===ym, d = +iso.slice(8,10);
@@ -1097,6 +1125,7 @@ function render(){
   renderMe();
   document.querySelectorAll("[data-needs-write]").forEach(el=>el.hidden=!canWrite);
   ["fab","addBill","addCatBudget","setGroc","addPlan"].forEach(id=>{ const el=$(id); if(el) el.hidden=!canWrite; });
+  maybeMigrateBudget();
 }
 function renderTop(){
   const h = today.getHours();
@@ -1147,7 +1176,7 @@ function incomeIn(isoTest, monthsMain){
 function overviewData(c){
   const prevYm = shiftYm(ym,-1);
   if (ovType==="inc"){
-    const mainOf = (m, doc) => doc && doc.income!=null ? Number(doc.income)||0 : incomeDefault(m);
+    const mainOf = (m, doc) => doc && doc.income!=null ? Number(doc.income)||0 : V2() ? Number(((doc||{}).budget||{}).income)||0 : incomeDefault(m);
     if (ovPeriod==="week"){
       const w = weeksOf(ymOf(today)).find(x=>x.isos.includes(todayISO));
       return { by: incomeIn(d=>w.isos.includes(d), [[ym, mainOf(ym, S.month)], [prevYm, mainOf(prevYm, S.prevMonth)]]), label:`minggu ${w.label}` };
@@ -1207,6 +1236,8 @@ function weekNow(c){
 }
 
 function renderHome(c){
+  const hp = $("homePull"); hp.hidden = c.hasBudget;
+  if (!c.hasBudget) hp.innerHTML = `<button type="button" class="pullcard" ${canWrite?"data-pull":'data-go="anggaran"'}>${icon(["cal","var(--primary)"])}<span><b>Anggaran ${esc(BULAN[c.info.m-1])} belum ada</b><small>Tarik dari bulan lain atau template</small></span>${canWrite?`<span class="go">Tarik</span>`:""}</button>`;
   const left = c.income - c.spent - c.savedMonth;
   $("balLeft").textContent = rp(left);
   $("balSave").textContent = short(c.savedMonth);
@@ -1296,6 +1327,13 @@ function renderPlansList(){
 
 function renderBudget(c){
   renderPlansList();
+  if (!c.hasBudget){
+    $("mbCard").innerHTML = `<div class="budempty">${icon(["cal","var(--primary)"], true)}<b>Anggaran ${esc(c.info.label)} belum ada</b>
+      ${canWrite?`<button type="button" class="btn primary" data-pull>Tarik anggaran</button>`:""}</div>`;
+  } else renderBudgetCard(c);
+  renderBudgetRest(c);
+}
+function renderBudgetCard(c){
   const used = c.plan>0 ? Math.round(c.spent/c.plan*100) : 0, sisa = c.plan - c.spent;
   $("mbCard").innerHTML = `
     <div class="mb-top"><div><small>Anggaran bulanan</small><div class="mb-big">${rp(c.plan)}</div></div>
@@ -1307,8 +1345,10 @@ function renderBudget(c){
       <div class="stat"><small>Belanja</small><b>${short(c.grocBudget)}</b></div>
       <div class="stat"><small>Kategori lain</small><b>${short(c.plan-c.billsTotal-c.grocBudget)}</b></div>
     </div>
-    ${c.savedMonth ? `<div class="advice">Disisihkan <b>${rp(c.savedMonth)}</b></div>` : ""}`;
-
+    ${c.savedMonth ? `<div class="advice">Disisihkan <b>${rp(c.savedMonth)}</b></div>` : ""}
+    ${V2() && canWrite ? `<div class="mbtools"><button type="button" class="link" data-pull>Tarik anggaran</button><button type="button" class="link" data-tpl>Template</button></div>` : ""}`;
+}
+function renderBudgetRest(c){
   // calendar
   const {m:cm} = c.info, dayNow = dayNowOf();
   const wk = weeksOf(ym).map(w=>({...w, spent: S.txAll.filter(t=>t.type!=="inc" && t.category===GROC && w.isos.includes(t.date)).reduce((a,t)=>a+t.amount,0)}));
@@ -1357,7 +1397,10 @@ function renderProfile(c){
   const name = S.settings.familyName || "Keluarga";
   $("profName").textContent = name;
   $("profAvatar").textContent = (name.replace(/^keluarga\s*/i,"")[0] || name[0] || "K").toUpperCase();
-  $("valIncomeDefault").textContent = incomeDefault(ym) ? short(incomeDefault(ym)) : "Atur";
+  const tIncome = V2() ? Number((tpl()||{}).income)||0 : incomeDefault(ym);
+  $("valIncomeDefault").textContent = tIncome ? short(tIncome) : "Atur";
+  $("setIncomeDefault").querySelector("small").hidden = !V2();
+  $("setTpl").hidden = !V2(); $("valTpl").textContent = budFilled(tpl()) ? short(budTotal(tpl())) : "Atur";
   $("valPayday").textContent = S.settings.payday ? `Tgl ${S.settings.payday}` : "Tgl 1";
   $("lblIncomeMonth").textContent = c.info.label;
   $("valIncomeMonth").textContent = incomeBase() ? short(incomeBase()) : "Atur";
@@ -1754,19 +1797,27 @@ function denied(){ toast("Anda tidak punya akses untuk ini."); }
 function subMonth(){
   if (mode!=="cloud"){ setTxAll(S.txAll); render(); return; }
   unsubs.forEach(u=>u()); unsubs = [];
-  S.month = {}; S.prevMonth = {}; setTxAll([]); render();
+  S.month = {}; S.prevMonth = {}; S._monthLoaded = false; setTxAll([]); render();
   const near = [shiftYm(ym,-1), ym, shiftYm(ym,1)];
-  unsubs.push(dref("months/"+ym).onSnapshot(s=>{ S.month = s.exists ? s.data() : {}; render(); }, onDbErr));
+  unsubs.push(dref("months/"+ym).onSnapshot(s=>{ S.month = s.exists ? s.data() : {}; S._monthLoaded = true; render(); }, onDbErr));
   unsubs.push(dref("months/"+near[0]).onSnapshot(s=>{ S.prevMonth = s.exists ? s.data() : {}; render(); }, onDbErr));
   unsubs.push(col("tx").where("month","in",near).onSnapshot(s=>{ setTxAll(s.docs.map(d=>({id:d.id,...d.data()}))); render(); }, onDbErr));
 }
 async function saveMonth(next){ if (mode==="cloud") await write(dref("months/"+ym).set(next)); else { S.month=next; render(); } }
 async function setPaid(id, value){ const paid={...(S.month.paid||{})}; if (value==null) delete paid[id]; else paid[id]=value; await saveMonth({...S.month, paid}); }
+async function saveBudget(patch, monthPatch){
+  const cur = S.month.budget || { v:1, bills:{}, groc:0, cats:{_:0} };
+  await saveMonth({ ...S.month, ...(monthPatch||{}), budget: { ...cur, ...patch, v:1 } });
+}
 async function saveBill(id, data){
+  if (V2()) return saveBudget({ bills: { ...((S.month.budget||{}).bills||{}), [id]: clean(data) } });
   if (mode==="cloud") await write(col("bills").doc(id).set(data));
   else { const i=S.billsRaw.findIndex(b=>b.id===id), v={id,...data}; if(i>=0)S.billsRaw[i]=v; else S.billsRaw.push(v); S.billsRaw.sort(sortBills); render(); }
 }
-async function deleteBill(id){ if (mode==="cloud") await write(col("bills").doc(id).delete()); else { S.billsRaw=S.billsRaw.filter(b=>b.id!==id); render(); } }
+async function deleteBill(id){
+  if (V2()){ const bills = { ...((S.month.budget||{}).bills||{}) }; delete bills[id]; const paid = { ...(S.month.paid||{}) }; delete paid[id];
+    return saveBudget({ bills }, { paid }); }
+  if (mode==="cloud") await write(col("bills").doc(id).delete()); else { S.billsRaw=S.billsRaw.filter(b=>b.id!==id); render(); } }
 async function saveTx(id, data){
   if (mode==="cloud") await write((id ? col("tx").doc(id) : col("tx").doc()).set(data));
   else { if (id) setTxAll(S.txAll.map(t=>t.id===id?{id,...data}:t)); else setTxAll([...S.txAll,{id:"l"+Date.now(),...data}]); render(); }
@@ -2178,13 +2229,15 @@ function openBill(id){
   const b = id ? S.bills.find(x=>x.id===id) : null;
   openSheet(b?"Ubah tagihan":"Tagihan baru", `
     <div class="field"><label for="bName">Nama tagihan</label><div class="namerow"><button type="button" class="icbtn" id="bPrev" aria-label="Pilih ikon"></button><input id="bName" maxlength="40" value="${b?esc(b.name):""}" placeholder="mis. Iuran sampah"></div></div>
-    ${amountField("bAmt",`Rencana per bulan · mulai ${monthInfo(ym).label}`, b? String(b.amount):"")}
+    ${amountField("bAmt", V2() ? `Rencana ${monthInfo(ym).label}` : `Rencana per bulan · mulai ${monthInfo(ym).label}`, b? String(b.amount):"")}
     <div class="field"><label for="bDue">Jatuh tempo (tanggal)</label><input id="bDue" type="number" min="1" max="31" inputmode="numeric" value="${b&&b.dueDay?b.dueDay:""}" placeholder="opsional, 1–31"></div>
     <div class="actions"><button type="submit" class="btn primary">Simpan</button>${b?`<button type="button" class="btn danger" id="bDel">Hapus tagihan</button>`:""}</div>
   `, async ()=>{
     const name = $("bName").value.trim(); if (!name){ $("bName").focus(); return false; }
     const amount = readAmount("bAmt"); if (!amount) return false;
     const due = parseInt($("bDue").value,10);
+    if (V2()){ await saveBill(b ? b.id : "b"+Date.now().toString(36), { name, amount, icon: pickedIcon || billGuess(name), dueDay: due>=1&&due<=31 ? due : undefined, order: b ? (b.order??99) : S.bills.length+1 });
+      toast(b ? "Tagihan diperbarui" : "Tagihan ditambahkan"); return; }
     const raw = b ? (S.billsRaw.find(x=>x.id===b.id) || b) : null;
     const data = { name, icon: pickedIcon || billGuess(name), dueDay: due>=1&&due<=31 ? due : null, order: raw ? (raw.order??99) : S.billsRaw.length+1 };
     if (!raw){ data.amount = amount; data.from = ym; }
@@ -2205,8 +2258,9 @@ function openBill(id){
   $("bName").addEventListener("input", ()=>{ if (!pickedIcon) prev(); });
   prev();
   if (b){ const del=$("bDel"); del.onclick=async()=>{
-    const raw = S.billsRaw.find(x=>x.id===b.id) || b, f = billFrom(raw), full = f && f>=ym;
-    if (!(await askDelete("Hapus tagihan?", full ? `${eB(b.name)} akan dihapus.` : `${eB(b.name)} dihapus mulai ${eB(monthInfo(ym).label)}. Bulan sebelumnya tetap.`, "Hapus tagihan"))) return;
+    const raw = S.billsRaw.find(x=>x.id===b.id) || b, f = billFrom(raw), full = V2() || (f && f>=ym);
+    const paidNow = (S.month.paid||{})[b.id]!=null;
+    if (!(await askDelete("Hapus tagihan?", V2() ? `${eB(b.name)} dihapus dari ${eB(monthInfo(ym).label)}${paidNow?" beserta pembayarannya":""}. Bulan lain tidak berubah.` : full ? `${eB(b.name)} akan dihapus.` : `${eB(b.name)} dihapus mulai ${eB(monthInfo(ym).label)}. Bulan sebelumnya tetap.`, "Hapus tagihan"))) return;
     try {
       if (full) await deleteBill(b.id);
       else { const { id:_i, ...rest } = raw; await saveBill(b.id, { ...rest, ...(f?{from:f}:{}), until: shiftYm(ym,-1) }); }
@@ -2284,7 +2338,9 @@ function openAmountSetting(title, note, current, chips, save, clearLabel, onClea
   wireAmount("setAmt");
   if (clearLabel) $("setClear").onclick = async()=>{ try { await onClear(); closeSheet(); } catch(e){ fail(e); } };
 }
-const openIncomeMonth = () => openAmountSetting(`Pemasukan ${monthInfo(ym).label}`,
+const openIncomeMonth = () => V2() ? openAmountSetting(`Pemasukan ${monthInfo(ym).label}`, "", incomeBase(), null,
+  async n=>{ const m = { ...S.month }; delete m.income; S.month = m; await saveBudget({ income:n }); toast("Pemasukan bulan ini disimpan"); })
+ : openAmountSetting(`Pemasukan ${monthInfo(ym).label}`,
   "Gaji atau pemasukan utama khusus bulan ini. Pemasukan tambahan bisa dicatat lewat tombol +.",
   incomeBase(), null, async n=>{ await saveMonth({...S.month, income:n}); toast("Pemasukan bulan ini disimpan"); },
   S.month.income!=null && incomeDefault(ym) ? "Kembali ke pemasukan rutin" : null,
@@ -2296,24 +2352,95 @@ function openPayday(){
   async ()=>{ const d = parseInt($("pdDay").value,10); if (!(d>=1 && d<=31)){ $("pdDay").focus(); return false; }
     await saveSettings({ payday: d }); toast("Tanggal gajian disimpan"); }, "pdDay");
 }
-const openIncomeDefault = () => openAmountSetting(`Pemasukan rutin · mulai ${monthInfo(ym).label}`, "",
+const tpl = () => S.settings.template || null;
+const openIncomeDefault = () => V2() ? openAmountSetting("Pemasukan rutin", "", Number((tpl()||{}).income)||"", null,
+  async n=>{ await saveSettings({ template: { v:1, bills:{}, groc:0, cats:{_:0}, ...(tpl()||{}), income:n } }); toast("Pemasukan rutin disimpan"); })
+ : openAmountSetting(`Pemasukan rutin · mulai ${monthInfo(ym).label}`, "",
   incomeDefault(ym), null, async n=>{ await saveSettings({incomeHist: histFrom(S.settings.incomeHist, ym, n)}); toast("Pemasukan rutin disimpan"); });
-const openGroc = () => openAmountSetting(`Belanja mingguan · mulai ${monthInfo(ym).label}`, "",
-  grocMonthly() || "", [3000000,3600000,4000000,4500000,5000000], async n=>{ await saveSettings({grocHist: histFrom(S.settings.grocHist, ym, n)}); toast("Anggaran belanja disimpan"); });
-const saveCatBudgets = map => saveSettings({ catHist: histFrom(S.settings.catHist, ym, { _:0, ...map }) });
+const openGroc = () => openAmountSetting(V2() ? `Belanja mingguan · ${monthInfo(ym).label}` : `Belanja mingguan · mulai ${monthInfo(ym).label}`, "",
+  calc().grocBudget || "", [3000000,3600000,4000000,4500000,5000000], async n=>{ if (V2()){ await saveBudget({ groc:n }); toast("Anggaran belanja disimpan"); return; } await saveSettings({grocHist: histFrom(S.settings.grocHist, ym, n)}); toast("Anggaran belanja disimpan"); });
+const saveCatBudgets = map => V2() ? saveBudget({ cats: { _:0, ...map } }) : saveSettings({ catHist: histFrom(S.settings.catHist, ym, { _:0, ...map }) });
 function openCatBudget(cat){
   if (!cat){
-    const cb = catBudgetsAt(ym);
+    const cb = calc().catBudgets;
     openSheet("Anggaran per kategori", `
       <div class="card" style="box-shadow:none;padding:0;gap:0">${BUDGETABLE.map(k=>`<button type="button" class="set" data-pickcat="${esc(k)}">${icon(catStyle(k),true)}<span><b>${esc(k)}</b><small>${cb[k]?"per bulan":"belum ada batas"}</small></span><span class="val">${cb[k]?short(cb[k]):"Atur"}</span></button>`).join("")}</div>`, null);
     sheet.querySelectorAll("[data-pickcat]").forEach(b=>b.onclick=()=>openCatBudget(b.dataset.pickcat));
     return;
   }
-  const cur = catBudgetsAt(ym)[cat];
-  openAmountSetting(`Anggaran ${cat} · mulai ${monthInfo(ym).label}`, "", cur, [200000,500000,1000000],
-    async n=>{ await saveCatBudgets({...catBudgetsAt(ym), [cat]:n}); toast(`Anggaran ${cat} disimpan`); },
+  const curMap = calc().catBudgets, cur = curMap[cat];
+  openAmountSetting(`Anggaran ${cat} · ${V2() ? "" : "mulai "}${monthInfo(ym).label}`, "", cur, [200000,500000,1000000],
+    async n=>{ await saveCatBudgets({...curMap, [cat]:n}); toast(`Anggaran ${cat} disimpan`); },
     cur ? "Hapus batas" : null,
-    async()=>{ const cb={...catBudgetsAt(ym)}; delete cb[cat]; await saveCatBudgets(cb); toast("Batas dihapus"); });
+    async()=>{ const cb={...curMap}; delete cb[cat]; await saveCatBudgets(cb); toast("Batas dihapus"); });
+}
+/* pull a budget from a nearby month or the template into the open month */
+async function openPull(){
+  let docs = {};
+  if (mode==="cloud"){ try { const s = await col("months").get(); s.docs.forEach(d=>{ docs[d.id] = d.data(); }); } catch(e){ onDbErr(e); } }
+  const withBud = Object.keys(docs).filter(m=>m!==ym && budFilled(docs[m].budget)).sort();
+  const prev = withBud.filter(m=>m<ym).pop(), next = withBud.find(m=>m>ym);
+  const srcs = [];
+  if (prev) srcs.push({ key:"m:"+prev, title: monthInfo(prev).label, sub:"Bulan sebelumnya", bud: { ...docs[prev].budget, income: docs[prev].income ?? docs[prev].budget.income } });
+  if (next) srcs.push({ key:"m:"+next, title: monthInfo(next).label, sub:"Bulan sesudahnya", bud: { ...docs[next].budget, income: docs[next].income ?? docs[next].budget.income } });
+  if (budFilled(tpl())) srcs.push({ key:"tpl", title:"Template awal", sub:"Template", bud: tpl() });
+  const row = x => `<button type="button" class="set" data-src="${esc(x.key)}">${icon(x.key==="tpl" ? ["receipt","var(--blue)"] : ["cal","var(--primary)"], true)}<span><b>${esc(x.title)}</b><small>${x.sub} · ${budBills(x.bud).length} tagihan</small></span><span class="val">${short(budTotal(x.bud))}</span></button>`;
+  openSheet(`Tarik ke ${monthInfo(ym).label}`, `
+    ${srcs.length ? `<div class="card" style="box-shadow:none;padding:0;gap:0">${srcs.map(row).join("")}</div>` : `<p class="muted" style="text-align:center;margin:6px 0">Belum ada bulan lain atau template.</p>`}
+    <div class="actions"><button type="button" class="btn ghost" id="pullTpl">Atur template</button></div>`, null);
+  $("pullTpl").onclick = openTemplate;
+  sheet.querySelectorAll("[data-src]").forEach(b=>b.onclick=async()=>{
+    const x = srcs.find(s=>s.key===b.dataset.src); if (!x) return;
+    const cur = S.month.budget;
+    if (budFilled(cur) && !(await askDelete("Ganti anggaran?", `Anggaran ${eB(monthInfo(ym).label)} diganti dengan ${eB(x.title)}.`, "Ganti", "primary"))) return;
+    try { await applyBudget(x.bud); closeSheet(); toast(x.key==="tpl" ? "Template dipakai" : `Anggaran ${x.title} dipakai`); } catch(e){ fail(e); }
+  });
+}
+async function applyBudget(src){
+  const cur = S.month.budget || {}, paid = S.month.paid || {};
+  const bills = clean((src && src.bills) || {});
+  Object.keys(paid).forEach(id=>{ if (!bills[id] && cur.bills && cur.bills[id]) bills[id] = cur.bills[id]; });   // keep bills already paid this month
+  const income = (cur.income!=null || S.month.income!=null) ? (S.month.income ?? cur.income) : (Number(src.income)||0);
+  const m = { ...S.month }; delete m.income; S.month = m;
+  await saveBudget({ bills, groc: Number(src.groc)||0, cats: { _:0, ...budCats(src) }, income });
+}
+function openTemplate(){
+  const t = tpl(), bills = budBills(t), cats = budCats(t);
+  const line = (k, v) => `<div class="planline"><span>${k}</span><b>${v}</b></div>`;
+  openSheet("Template anggaran", `
+    ${t ? `<div class="tplsum">
+      ${line("Pemasukan", rp(Number(t.income)||0))}
+      ${line("Belanja mingguan", rp(Number(t.groc)||0))}
+      ${Object.entries(cats).filter(([,v])=>v>0).map(([k,v])=>line(esc(k), rp(v))).join("")}
+      ${bills.map(b=>line(esc(b.name), rp(b.amount))).join("")}
+      ${line("Total anggaran", rp(budTotal(t)))}
+    </div>` : `<p class="muted" style="text-align:center;margin:6px 0">Belum ada template.</p>`}
+    ${canWrite?`<div class="actions"><button type="button" class="btn primary" id="tplSave">Pakai ${esc(monthInfo(ym).label)} sebagai template</button></div>`:""}`, null);
+  if (!canWrite) return;
+  $("tplSave").onclick = async()=>{
+    const bud = monthBudget();
+    if (!budFilled(bud)){ toast(`Anggaran ${monthInfo(ym).label} masih kosong`); return; }
+    if (t && !(await askDelete("Ganti template?", `Template diganti dengan anggaran ${eB(monthInfo(ym).label)}.`, "Ganti", "primary"))) return;
+    try { await saveSettings({ template: clean({ v:1, bills: bud.bills||{}, groc: Number(bud.groc)||0, cats: { _:0, ...budCats(bud) }, income: incomeBase() }) }); closeSheet(); toast("Template disimpan"); } catch(e){ fail(e); }
+  };
+}
+/* one-time: copy the old shared lists into every month that already has records, plus this month, and make the template */
+let budMigrating = false;
+async function maybeMigrateBudget(){
+  if (budMigrating || V2() || mode!=="cloud" || !canWrite || !S._setLoaded || !S._billsLoaded) return;
+  budMigrating = true;
+  try {
+    const [ms, ts] = await Promise.all([col("months").get(), col("tx").get()]);
+    const docs = {}; ms.docs.forEach(d=>{ docs[d.id] = d.data(); });
+    const months = new Set([ymOf(today)]);
+    Object.entries(docs).forEach(([m,d])=>{ if ((d.paid && Object.keys(d.paid).length) || d.income!=null) months.add(m); });
+    ts.docs.forEach(d=>{ const t = d.data(); if (t.month) months.add(t.month); });
+    const upd = {};
+    months.forEach(m=>{ if (!/^\d{4}-\d{2}$/.test(m) || (docs[m] && docs[m].budget)) return; upd[ROOT+"/months/"+m+"/budget"] = clean(legacySnap(m, docs[m])); });
+    if (!S.settings.template) upd[ROOT+"/settings/main/template"] = clean(legacySnap(ymOf(today), docs[ymOf(today)]));
+    upd[ROOT+"/settings/main/budgetV2"] = true;
+    await rdb.ref().update(upd);
+  } catch(e){ onDbErr(e); budMigrating = false; }
 }
 function openName(){
   openSheet("Nama keluarga", `<div class="field"><label for="famName">Nama</label><input id="famName" maxlength="30" value="${esc(S.settings.familyName||"")}" placeholder="mis. Keluarga Wahyu"></div>
@@ -2345,6 +2472,8 @@ $("setGroc").onclick=openGroc; $("setGroc2").onclick=openGroc;
 $("incomeBtn").onclick=()=>{ if (canWrite) openIncomeMonth(); };
 $("setIncomeMonth").onclick=openIncomeMonth;
 $("setIncomeDefault").onclick=openIncomeDefault;
+$("setTpl").onclick=openTemplate;
+document.addEventListener("click", e=>{ if (e.target.closest("[data-pull]")){ if (canWrite) openPull(); } else if (e.target.closest("[data-tpl]")) openTemplate(); });
 $("setPayday").onclick=openPayday;
 $("addCatBudget").onclick=()=>openCatBudget(); $("addCatBudget2").onclick=()=>openCatBudget();
 $("setName").onclick=openName;
@@ -2533,8 +2662,8 @@ function startData(){
   rootUnsubs.push(col("savTx").onSnapshot(s=>{ S.sav.tx = s.docs.map(d=>({ id:d.id, ...d.data() })); if (screen==="tabungan") render(); }, onDbErr));
   rootUnsubs.push(col("savPrices").onSnapshot(s=>{ S.sav.prices = Object.fromEntries(s.docs.map(d=>[d.id, d.data()])); if (screen==="tabungan") render(); }, onDbErr));
   rootUnsubs.push(col("savSnaps").onSnapshot(s=>{ S.sav.snaps = Object.fromEntries(s.docs.map(d=>[d.id, d.data()])); if (screen==="tabungan") render(); }, onDbErr));
-  rootUnsubs.push(col("bills").onSnapshot(s=>{ S.billsRaw = s.docs.map(d=>({id:d.id,...d.data()})).sort(sortBills); render(); }, onDbErr));
-  rootUnsubs.push(dref("settings/main").onSnapshot(s=>{ S.settings = s.exists ? s.data() : {}; render(); }, onDbErr));
+  rootUnsubs.push(col("bills").onSnapshot(s=>{ S.billsRaw = s.docs.map(d=>({id:d.id,...d.data()})).sort(sortBills); S._billsLoaded = true; render(); maybeMigrateBudget(); }, onDbErr));
+  rootUnsubs.push(dref("settings/main").onSnapshot(s=>{ S.settings = s.exists ? s.data() : {}; S._setLoaded = true; render(); maybeMigrateBudget(); }, onDbErr));
   rootUnsubs.push(docRef(famPath("meta")).onSnapshot(s=>{ S.family.meta = s.data(); S.famNames[FID] = S.family.meta.name || S.famNames[FID]; render(); }, onDbErr));
   rootUnsubs.push(colRef(famPath("members")).onSnapshot(s=>{
     S.family.members = Object.fromEntries(s.docs.map(d=>[d.id, d.data()]));
@@ -2565,7 +2694,8 @@ function startData(){
 }
 function stopData(){
   rootUnsubs.forEach(u=>u()); rootUnsubs = []; unsubs.forEach(u=>u()); unsubs = []; started = false;
-  Object.assign(S, { bills:[], billsRaw:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[], family:{ meta:{}, members:{} }, sav:{ assets:[], tx:[], prices:{}, snaps:{} } });
+  budMigrating = false;
+  Object.assign(S, { _setLoaded:false, _billsLoaded:false, bills:[], billsRaw:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[], family:{ meta:{}, members:{} }, sav:{ assets:[], tx:[], prices:{}, snaps:{} } });
 }
 function openFamily(fid){
   if (fid === FID && started) return;
