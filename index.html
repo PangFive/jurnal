@@ -1304,8 +1304,19 @@ function renderTx(c){
   }).join("");
 }
 
+/* a plan shows from the month it was made through the month it happens; once its date has passed
+   (or it is marked done) it leaves the monthly lists and is kept under "Selesai & lewat" */
+const planOver = p => !!p.done || ((p.end || p.start) ? (p.end || p.start) < todayISO : false);
+function planInMonth(p, m){
+  if (planOver(p)) return false;
+  const mk = /^pl([0-9a-z]{7,9})$/.exec(p.id||""), ts = p.created || (mk ? parseInt(mk[1],36) : 0);
+  const txm = S.planTx.filter(t=>t.planId===p.id && t.month).map(t=>t.month).sort()[0];
+  const from = ts > 1.6e12 && ts < 2.2e12 ? ymOf(new Date(ts)) : (txm || ymOf(today));
+  const last = (p.end || p.start || "").slice(0,7);
+  return m >= from && (!last || m <= last);
+}
 function plansCards(){
-  const ps = [...S.plans].filter(p=>!p.done).sort(sortPlans);
+  const ps = [...S.plans].filter(p=>!p.done && planInMonth(p, ym)).sort(sortPlans);
   return ps.map(p=>{ const st = planStats(p), w = planWhen(p, st);
     return `<button type="button" class="pcard" data-plan="${esc(p.id)}">
       <div class="top">${planIcon(p,true)}${w.tag}</div>
@@ -1317,13 +1328,20 @@ function plansCards(){
     (canWrite ? `<button type="button" class="pcard new" data-newplan>${icon(["plus","#5A5CF0"])}<span>Rencana baru</span></button>` : "");
 }
 function renderPlansList(){
-  const ps = [...S.plans].sort(sortPlans);
+  const ps = [...S.plans].filter(p=>planInMonth(p, ym)).sort(sortPlans), over = S.plans.filter(planOver);
   $("plansList").innerHTML = ps.length ? ps.map(p=>{ const st = planStats(p), w = planWhen(p, st);
     return `<button type="button" class="prow" data-plan="${esc(p.id)}">${planIcon(p,true)}
       <span class="mid"><b>${esc(p.name)}</b>${barHtml(st.saved, st.budget, true)}<small>Terkumpul ${short(st.saved)} / ${short(st.budget)} · terpakai ${short(st.spent)}</small></span>
       <span style="display:grid;justify-items:end;gap:4px">${w.tag || `<span class="tag done">${planType(p).label}</span>`}<small class="muted" style="font-size:11px">${Math.round(pct(st.saved,st.budget))}%</small></span></button>`; }).join("")
     : `<div class="empty">Belum ada rencana.</div>`;
+  if (over.length) $("plansList").innerHTML += `<button type="button" class="morebtn" data-plansover>Selesai & lewat (${over.length})${ico("chev","i")}</button>`;
 }
+function openPlansOver(){
+  const ps = S.plans.filter(planOver).sort((a,b)=>(b.end||b.start||"").localeCompare(a.end||a.start||""));
+  openSheet("Selesai & lewat", `<div class="card" style="box-shadow:none;padding:0;gap:0">${ps.map(p=>{ const st = planStats(p), w = planWhen(p, st);
+    return `<button type="button" class="prow" data-plan="${esc(p.id)}">${planIcon(p,true)}<span class="mid"><b>${esc(p.name)}</b><small>${w.range} · terpakai ${short(st.spent)}</small></span>${w.tag}</button>`; }).join("") || `<div class="empty">Tidak ada.</div>`}</div>`, null);
+}
+document.addEventListener("click", e=>{ if (e.target.closest("[data-plansover]")) openPlansOver(); });
 
 function renderBudget(c){
   renderPlansList();
