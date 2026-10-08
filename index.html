@@ -850,7 +850,7 @@ const ymOf = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
 let ym = ymOf(today);
 let screen = "beranda", txFilter = "all", txQuery = "";
 
-const S = { bills:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[], family:{ meta:{}, members:{} }, myFamilies:[], famNames:{} };
+const S = { bills:[], billsRaw:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[], family:{ meta:{}, members:{} }, myFamilies:[], famNames:{} };
 function setTxAll(list){ S.txAll = list; S.tx = list.filter(t=>t.month===ym); }
 let db = null, auth = null, canWrite = true, mode = "connecting", currentUser = null;
 let FID = null, ROOT = null, ME = null;                 // current family, its data path, my email key
@@ -1002,10 +1002,29 @@ function planWhen(p, st){
 /* ---------- numbers ---------- */
 const realOf = v => v==null ? 0 : (typeof v==="number" ? v : Number(v.amount)||0);
 const paidDateOf = v => (v && typeof v==="object" && v.date) ? v.date : null;
-const incomeBase = () => S.month.income != null ? Number(S.month.income)||0 : Number(S.settings.income)||0;
+/* Plan values are templates that take effect from a month onward, so changing them never rewrites
+   earlier months. hist = { "YYYY-MM": value }; a month uses the newest key at or before it, else base. */
+function effAt(hist, m, base){ let v = base, k0 = ""; Object.keys(hist||{}).forEach(k=>{ if (k<=m && k>k0){ k0 = k; v = hist[k]; } }); return v; }
+function histFrom(hist, m, v){ const h = {}; Object.entries(hist||{}).forEach(([k,x])=>{ if (k<m) h[k] = x; }); h[m] = v; return h; }
+const incomeDefault = (m=ym) => Number(effAt(S.settings.incomeHist, m, Number(S.settings.income)||0))||0;
+const incomeBase = () => S.month.income != null ? Number(S.month.income)||0 : incomeDefault(ym);
 /* grocery budget is one monthly amount (older data stored a weekly amount) */
-const grocMonthly = () => Number(S.settings.monthlyGrocery) || (Number(S.settings.weeklyGrocery)||0) * 4;
+const grocMonthly = (m=ym) => Number(effAt(S.settings.grocHist, m, Number(S.settings.monthlyGrocery) || (Number(S.settings.weeklyGrocery)||0) * 4))||0;
+/* category budgets: each history entry is the full map for that month on ("_" keeps an emptied map from vanishing) */
+const catBudgetsAt = (m=ym) => { const v = effAt(S.settings.catHist, m, S.settings.catBudgets||{}) || {}; const o = {...v}; delete o._; return o; };
+/* bills: first month they count (bills made before this rule carry it in their id) and last month after deletion */
+function billFrom(b){
+  if (b.from) return b.from;
+  const m = /^b([0-9a-z]{7,9})$/.exec(b.id||""); if (!m) return null;
+  const ts = parseInt(m[1],36); return ts > 1.6e12 && ts < 2.2e12 ? ymOf(new Date(ts)) : null;
+}
+function billsFor(m, paid){
+  return S.billsRaw.filter(b=>{ const f = billFrom(b);
+    return ((!f || f<=m) && (!b.until || m<=b.until)) || (paid && paid[b.id]!=null); })
+    .map(b=>({ ...b, amount: Number(effAt(b.amounts, m, b.amount))||0 }));
+}
 function calc(){
+  S.bills = billsFor(ym, S.month.paid);
   const info = monthInfo(ym);
   const paid = S.month.paid || {};
   const billsTotal = S.bills.reduce((a,b)=>a+(b.amount||0),0);
@@ -1016,7 +1035,7 @@ function calc(){
   const grocBudget = grocMonthly();
   const byCat = {}; exp.forEach(t=>{ byCat[t.category]=(byCat[t.category]||0)+t.amount; });
   const grocSpent = byCat[GROC]||0;
-  const catBudgets = S.settings.catBudgets || {};
+  const catBudgets = catBudgetsAt(ym);
   const otherBudget = BUDGETABLE.reduce((a,k)=>a+(Number(catBudgets[k])||0),0);
   const otherCommitted = BUDGETABLE.reduce((a,k)=>a+Math.max(Number(catBudgets[k])||0, byCat[k]||0),0);
   const income = incomeBase() + txInc;
@@ -1128,7 +1147,7 @@ function incomeIn(isoTest, monthsMain){
 function overviewData(c){
   const prevYm = shiftYm(ym,-1);
   if (ovType==="inc"){
-    const mainOf = (m, doc) => doc && doc.income!=null ? Number(doc.income)||0 : Number(S.settings.income)||0;
+    const mainOf = (m, doc) => doc && doc.income!=null ? Number(doc.income)||0 : incomeDefault(m);
     if (ovPeriod==="week"){
       const w = weeksOf(ymOf(today)).find(x=>x.isos.includes(todayISO));
       return { by: incomeIn(d=>w.isos.includes(d), [[ym, mainOf(ym, S.month)], [prevYm, mainOf(prevYm, S.prevMonth)]]), label:`minggu ${w.label}` };
@@ -1338,7 +1357,7 @@ function renderProfile(c){
   const name = S.settings.familyName || "Keluarga";
   $("profName").textContent = name;
   $("profAvatar").textContent = (name.replace(/^keluarga\s*/i,"")[0] || name[0] || "K").toUpperCase();
-  $("valIncomeDefault").textContent = S.settings.income ? short(S.settings.income) : "Atur";
+  $("valIncomeDefault").textContent = incomeDefault(ym) ? short(incomeDefault(ym)) : "Atur";
   $("valPayday").textContent = S.settings.payday ? `Tgl ${S.settings.payday}` : "Tgl 1";
   $("lblIncomeMonth").textContent = c.info.label;
   $("valIncomeMonth").textContent = incomeBase() ? short(incomeBase()) : "Atur";
@@ -1745,9 +1764,9 @@ async function saveMonth(next){ if (mode==="cloud") await write(dref("months/"+y
 async function setPaid(id, value){ const paid={...(S.month.paid||{})}; if (value==null) delete paid[id]; else paid[id]=value; await saveMonth({...S.month, paid}); }
 async function saveBill(id, data){
   if (mode==="cloud") await write(col("bills").doc(id).set(data));
-  else { const i=S.bills.findIndex(b=>b.id===id), v={id,...data}; if(i>=0)S.bills[i]=v; else S.bills.push(v); S.bills.sort(sortBills); render(); }
+  else { const i=S.billsRaw.findIndex(b=>b.id===id), v={id,...data}; if(i>=0)S.billsRaw[i]=v; else S.billsRaw.push(v); S.billsRaw.sort(sortBills); render(); }
 }
-async function deleteBill(id){ if (mode==="cloud") await write(col("bills").doc(id).delete()); else { S.bills=S.bills.filter(b=>b.id!==id); render(); } }
+async function deleteBill(id){ if (mode==="cloud") await write(col("bills").doc(id).delete()); else { S.billsRaw=S.billsRaw.filter(b=>b.id!==id); render(); } }
 async function saveTx(id, data){
   if (mode==="cloud") await write((id ? col("tx").doc(id) : col("tx").doc()).set(data));
   else { if (id) setTxAll(S.txAll.map(t=>t.id===id?{id,...data}:t)); else setTxAll([...S.txAll,{id:"l"+Date.now(),...data}]); render(); }
@@ -2159,14 +2178,23 @@ function openBill(id){
   const b = id ? S.bills.find(x=>x.id===id) : null;
   openSheet(b?"Ubah tagihan":"Tagihan baru", `
     <div class="field"><label for="bName">Nama tagihan</label><div class="namerow"><button type="button" class="icbtn" id="bPrev" aria-label="Pilih ikon"></button><input id="bName" maxlength="40" value="${b?esc(b.name):""}" placeholder="mis. Iuran sampah"></div></div>
-    ${amountField("bAmt","Rencana per bulan", b? String(b.amount):"")}
+    ${amountField("bAmt",`Rencana per bulan · mulai ${monthInfo(ym).label}`, b? String(b.amount):"")}
     <div class="field"><label for="bDue">Jatuh tempo (tanggal)</label><input id="bDue" type="number" min="1" max="31" inputmode="numeric" value="${b&&b.dueDay?b.dueDay:""}" placeholder="opsional, 1–31"></div>
     <div class="actions"><button type="submit" class="btn primary">Simpan</button>${b?`<button type="button" class="btn danger" id="bDel">Hapus tagihan</button>`:""}</div>
   `, async ()=>{
     const name = $("bName").value.trim(); if (!name){ $("bName").focus(); return false; }
     const amount = readAmount("bAmt"); if (!amount) return false;
     const due = parseInt($("bDue").value,10);
-    await saveBill(b ? b.id : "b"+Date.now().toString(36), { name, amount, icon: pickedIcon || billGuess(name), dueDay: due>=1&&due<=31 ? due : null, order: b ? (b.order??99) : S.bills.length+1 });
+    const raw = b ? (S.billsRaw.find(x=>x.id===b.id) || b) : null;
+    const data = { name, icon: pickedIcon || billGuess(name), dueDay: due>=1&&due<=31 ? due : null, order: raw ? (raw.order??99) : S.billsRaw.length+1 };
+    if (!raw){ data.amount = amount; data.from = ym; }
+    else {
+      const f = billFrom(raw);
+      if (f) data.from = f; if (raw.until) data.until = raw.until;
+      if (f && f>=ym){ data.amount = amount; }            // starts this month: just set it
+      else { data.amount = raw.amount; const h = amount===b.amount ? raw.amounts : histFrom(raw.amounts, ym, amount); if (h && Object.keys(h).length) data.amounts = h; }
+    }
+    await saveBill(raw ? raw.id : "b"+Date.now().toString(36), data);
     toast(b ? "Tagihan diperbarui" : "Tagihan ditambahkan");
   }, b ? null : "bName");
   wireAmount("bAmt");
@@ -2176,8 +2204,13 @@ function openBill(id){
   $("bPrev").onclick = ()=>openIconPopup(curIcon(), k=>{ pickedIcon = k; prev(); }, $("bPrev"));
   $("bName").addEventListener("input", ()=>{ if (!pickedIcon) prev(); });
   prev();
-  if (b){ const del=$("bDel"); del.onclick=async()=>{ if (!(await askDelete("Hapus tagihan?", `${eB(b.name)} tidak akan muncul lagi di tagihan bulanan.`, "Hapus tagihan"))) return;
-    try { await deleteBill(b.id); closeSheet(); toast("Tagihan dihapus"); } catch(e){ fail(e); } }; }
+  if (b){ const del=$("bDel"); del.onclick=async()=>{
+    const raw = S.billsRaw.find(x=>x.id===b.id) || b, f = billFrom(raw), full = f && f>=ym;
+    if (!(await askDelete("Hapus tagihan?", full ? `${eB(b.name)} akan dihapus.` : `${eB(b.name)} dihapus mulai ${eB(monthInfo(ym).label)}. Bulan sebelumnya tetap.`, "Hapus tagihan"))) return;
+    try {
+      if (full) await deleteBill(b.id);
+      else { const { id:_i, ...rest } = raw; await saveBill(b.id, { ...rest, ...(f?{from:f}:{}), until: shiftYm(ym,-1) }); }
+      closeSheet(); toast("Tagihan dihapus"); } catch(e){ fail(e); } }; }
 }
 
 function openPay(id, presetDate){
@@ -2254,7 +2287,7 @@ function openAmountSetting(title, note, current, chips, save, clearLabel, onClea
 const openIncomeMonth = () => openAmountSetting(`Pemasukan ${monthInfo(ym).label}`,
   "Gaji atau pemasukan utama khusus bulan ini. Pemasukan tambahan bisa dicatat lewat tombol +.",
   incomeBase(), null, async n=>{ await saveMonth({...S.month, income:n}); toast("Pemasukan bulan ini disimpan"); },
-  S.month.income!=null && S.settings.income ? "Kembali ke pemasukan rutin" : null,
+  S.month.income!=null && incomeDefault(ym) ? "Kembali ke pemasukan rutin" : null,
   async()=>{ const m={...S.month}; delete m.income; await saveMonth(m); toast("Mengikuti pemasukan rutin"); });
 function openPayday(){
   openSheet("Tanggal gajian", `
@@ -2263,24 +2296,24 @@ function openPayday(){
   async ()=>{ const d = parseInt($("pdDay").value,10); if (!(d>=1 && d<=31)){ $("pdDay").focus(); return false; }
     await saveSettings({ payday: d }); toast("Tanggal gajian disimpan"); }, "pdDay");
 }
-const openIncomeDefault = () => openAmountSetting("Pemasukan rutin per bulan",
-  "Dipakai otomatis untuk setiap bulan, kecuali bulan yang Anda ubah sendiri.",
-  S.settings.income, null, async n=>{ await saveSettings({income:n}); toast("Pemasukan rutin disimpan"); });
-const openGroc = () => openAmountSetting("Belanja mingguan · per bulan", "",
-  grocMonthly() || "", [3000000,3600000,4000000,4500000,5000000], async n=>{ await saveSettings({monthlyGrocery:n}); toast("Anggaran belanja disimpan"); });
+const openIncomeDefault = () => openAmountSetting(`Pemasukan rutin · mulai ${monthInfo(ym).label}`, "",
+  incomeDefault(ym), null, async n=>{ await saveSettings({incomeHist: histFrom(S.settings.incomeHist, ym, n)}); toast("Pemasukan rutin disimpan"); });
+const openGroc = () => openAmountSetting(`Belanja mingguan · mulai ${monthInfo(ym).label}`, "",
+  grocMonthly() || "", [3000000,3600000,4000000,4500000,5000000], async n=>{ await saveSettings({grocHist: histFrom(S.settings.grocHist, ym, n)}); toast("Anggaran belanja disimpan"); });
+const saveCatBudgets = map => saveSettings({ catHist: histFrom(S.settings.catHist, ym, { _:0, ...map }) });
 function openCatBudget(cat){
   if (!cat){
-    const cb = S.settings.catBudgets || {};
+    const cb = catBudgetsAt(ym);
     openSheet("Anggaran per kategori", `
       <div class="card" style="box-shadow:none;padding:0;gap:0">${BUDGETABLE.map(k=>`<button type="button" class="set" data-pickcat="${esc(k)}">${icon(catStyle(k),true)}<span><b>${esc(k)}</b><small>${cb[k]?"per bulan":"belum ada batas"}</small></span><span class="val">${cb[k]?short(cb[k]):"Atur"}</span></button>`).join("")}</div>`, null);
     sheet.querySelectorAll("[data-pickcat]").forEach(b=>b.onclick=()=>openCatBudget(b.dataset.pickcat));
     return;
   }
-  const cur = (S.settings.catBudgets||{})[cat];
-  openAmountSetting(`Anggaran ${cat}`, "Batas pengeluaran per bulan untuk kategori ini.", cur, [200000,500000,1000000],
-    async n=>{ await saveSettings({catBudgets:{...(S.settings.catBudgets||{}), [cat]:n}}); toast(`Anggaran ${cat} disimpan`); },
+  const cur = catBudgetsAt(ym)[cat];
+  openAmountSetting(`Anggaran ${cat} · mulai ${monthInfo(ym).label}`, "", cur, [200000,500000,1000000],
+    async n=>{ await saveCatBudgets({...catBudgetsAt(ym), [cat]:n}); toast(`Anggaran ${cat} disimpan`); },
     cur ? "Hapus batas" : null,
-    async()=>{ const cb={...(S.settings.catBudgets||{})}; delete cb[cat]; await saveSettings({catBudgets:cb}); toast("Batas dihapus"); });
+    async()=>{ const cb={...catBudgetsAt(ym)}; delete cb[cat]; await saveCatBudgets(cb); toast("Batas dihapus"); });
 }
 function openName(){
   openSheet("Nama keluarga", `<div class="field"><label for="famName">Nama</label><input id="famName" maxlength="30" value="${esc(S.settings.familyName||"")}" placeholder="mis. Keluarga Wahyu"></div>
@@ -2500,7 +2533,7 @@ function startData(){
   rootUnsubs.push(col("savTx").onSnapshot(s=>{ S.sav.tx = s.docs.map(d=>({ id:d.id, ...d.data() })); if (screen==="tabungan") render(); }, onDbErr));
   rootUnsubs.push(col("savPrices").onSnapshot(s=>{ S.sav.prices = Object.fromEntries(s.docs.map(d=>[d.id, d.data()])); if (screen==="tabungan") render(); }, onDbErr));
   rootUnsubs.push(col("savSnaps").onSnapshot(s=>{ S.sav.snaps = Object.fromEntries(s.docs.map(d=>[d.id, d.data()])); if (screen==="tabungan") render(); }, onDbErr));
-  rootUnsubs.push(col("bills").onSnapshot(s=>{ S.bills = s.docs.map(d=>({id:d.id,...d.data()})).sort(sortBills); render(); }, onDbErr));
+  rootUnsubs.push(col("bills").onSnapshot(s=>{ S.billsRaw = s.docs.map(d=>({id:d.id,...d.data()})).sort(sortBills); render(); }, onDbErr));
   rootUnsubs.push(dref("settings/main").onSnapshot(s=>{ S.settings = s.exists ? s.data() : {}; render(); }, onDbErr));
   rootUnsubs.push(docRef(famPath("meta")).onSnapshot(s=>{ S.family.meta = s.data(); S.famNames[FID] = S.family.meta.name || S.famNames[FID]; render(); }, onDbErr));
   rootUnsubs.push(colRef(famPath("members")).onSnapshot(s=>{
@@ -2532,7 +2565,7 @@ function startData(){
 }
 function stopData(){
   rootUnsubs.forEach(u=>u()); rootUnsubs = []; unsubs.forEach(u=>u()); unsubs = []; started = false;
-  Object.assign(S, { bills:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[], family:{ meta:{}, members:{} }, sav:{ assets:[], tx:[], prices:{}, snaps:{} } });
+  Object.assign(S, { bills:[], billsRaw:[], month:{}, prevMonth:{}, tx:[], txAll:[], settings:{}, plans:[], planTx:[], family:{ meta:{}, members:{} }, sav:{ assets:[], tx:[], prices:{}, snaps:{} } });
 }
 function openFamily(fid){
   if (fid === FID && started) return;
