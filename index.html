@@ -539,6 +539,11 @@ button.wallet.spin svg{animation:spin 1s linear infinite}
   <main class="screen" data-screen="anggaran" hidden>
     <section class="card" id="mbCard"></section>
 
+    <section class="sec" id="porsiSec" hidden>
+      <div class="sec-h"><h2>Porsi anggaran</h2></div>
+      <div class="card" id="budPie"></div>
+    </section>
+
     <section class="sec" id="kalender">
       <div class="sec-h"><h2>Kalender</h2><button class="link" id="setGroc">Atur</button></div>
       <div class="card" id="cal"></div>
@@ -1366,7 +1371,23 @@ function renderBudgetCard(c){
     ${c.savedMonth ? `<div class="advice">Disisihkan <b>${rp(c.savedMonth)}</b></div>` : ""}
     ${V2() && canWrite ? `<div class="mbtools"><button type="button" class="link" data-pull>Tarik anggaran</button><button type="button" class="link" data-tpl>Template</button></div>` : ""}`;
 }
+let pieMode = "cat";
+const PIE_COLORS = ["#5A5CF0","#8B5CF6","#3B82F6","#14B8A6","#1FAE78","#F5B82E","#FF8A3D","#EC4899","#EB4747","#06B6D4","#84CC16","#64748B"];
+function renderBudgetPie(c){
+  const sec = $("porsiSec"); sec.hidden = !(c.hasBudget && c.plan > 0); if (sec.hidden) return;
+  let rows;
+  if (pieMode==="bill") rows = S.bills.filter(b=>b.amount>0).map((b,i)=>({ n:b.name, v:b.amount, c:PIE_COLORS[i % PIE_COLORS.length] }));
+  else rows = [[BILLCAT, c.billsTotal], [GROC, c.grocBudget], ...BUDGETABLE.map(k=>[k, Number(c.catBudgets[k])||0])]
+    .filter(r=>r[1]>0).map(([k,v])=>({ n:k, v, c:catStyle(k)[1] }));
+  rows.sort((a,b)=>b.v-a.v);
+  const total = rows.reduce((a,r)=>a+r.v,0), free = c.income - c.plan;
+  $("budPie").innerHTML = `<div class="seg two ovtog" role="group" aria-label="Porsi"><button type="button" data-pie="cat" aria-pressed="${pieMode==="cat"}">Kategori</button><button type="button" data-pie="bill" aria-pressed="${pieMode==="bill"}">Tagihan</button></div>
+    ${total ? ringHtml(rows, total, pieMode==="bill" ? "Tagihan" : "Anggaran") : `<div class="empty">Belum ada tagihan.</div>`}
+    ${pieMode==="cat" && c.income>0 ? `<div class="advice">${free>=0 ? `Belum dianggarkan <b>${rp(free)}</b>` : `Melebihi pemasukan <b>${rp(-free)}</b>`}</div>` : ""}`;
+}
+document.addEventListener("click", e=>{ const b = e.target.closest("[data-pie]"); if (b){ pieMode = b.dataset.pie; render(); } });
 function renderBudgetRest(c){
+  renderBudgetPie(c);
   // calendar
   const {m:cm} = c.info, dayNow = dayNowOf();
   const wk = weeksOf(ym).map(w=>({...w, spent: S.txAll.filter(t=>t.type!=="inc" && t.category===GROC && w.isos.includes(t.date)).reduce((a,t)=>a+t.amount,0)}));
@@ -2213,8 +2234,10 @@ function openReport(){
   Object.entries(c.byCat).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>mrows.push([k, v, catStyle(k)]));
   const prows = S.plans.map(p=>[p, planTxM.filter(t=>t.planId===p.id && t.type==="exp").reduce((a,t)=>a+t.amount,0)]).filter(r=>r[1]>0).sort((a,b)=>b[1]-a[1]);
   const totalOut = c.spent + planExp;
-  const max = Math.max(1, ...mrows.map(r=>r[1]), ...prows.map(r=>r[1]));
-  const catRow = (ic, name, v, tag) => `<div class="cat" style="cursor:default">${ic}<span class="mid"><b>${esc(name)}${tag}</b><div class="bar thin"><i style="width:${v/max*100}%"></i></div><small>${rp(v)}</small></span><span class="pct">${totalOut?Math.round(v/totalOut*100):0}%</span></div>`;
+  /* right-hand % = used of its budget (same as Anggaran); share of total spending goes in the small line */
+  const budOf = k => k===BILLCAT ? c.billsTotal : k===GROC ? c.grocBudget : Number(c.catBudgets[k])||0;
+  const catRow = (ic, name, v, budget) => { const share = totalOut ? Math.round(v/totalOut*100) : 0;
+    return `<div class="cat" style="cursor:default">${ic}<span class="mid"><b>${esc(name)}</b>${budget ? barHtml(v, budget, true) : `<div class="bar thin"><i style="width:0"></i></div>`}<small>${rp(v)}${budget?` / ${rp(budget)}`:""} · ${share}% dari total</small></span><span class="pct ${budget && v>budget?"up":""}">${budget?Math.round(v/budget*100)+"%":"—"}</span></div>`; };
   const list = all.filter(e => reportFilter==="all" ? true : reportFilter==="plan" ? e.kind==="plan" : e.kind!=="plan");
   const groups = {}; list.forEach(e=>{ (groups[e.date] ||= []).push(e); });
   const listHtml = Object.keys(groups).sort().reverse().map(d=>`<div class="daygrp">${dayLabel(d)}</div><ul class="list">${groups[d].map(e=>`<li class="row">${entryIcon(e)}<div class="nm"><b>${esc(e.title)}<span class="kind${e.kind==="plan"?" k":""}">${e.kind==="plan"?"Khusus":"Bulanan"}</span></b><small>${esc(e.sub)}</small></div><div class="right"><span class="amt ${e.type}">${e.type==="inc"?"+":e.type==="save"?"→ ":"−"}${short(e.amount)}</span></div></li>`).join("")}</ul>`).join("")
@@ -2229,9 +2252,9 @@ function openReport(){
     </div>
     <div class="advice">Sisa uang bulanan <b>${rp(c.income - c.spent - saved)}</b></div>
     <div class="daysec">Bulanan</div>
-    <div style="display:grid">${mrows.map(([k,v,st])=>catRow(icon(st,true), k, v, "")).join("") || `<div class="empty">Tidak ada.</div>`}</div>
+    <div style="display:grid">${mrows.map(([k,v,st])=>catRow(icon(st,true), k, v, budOf(k))).join("") || `<div class="empty">Tidak ada.</div>`}</div>
     <div class="daysec">Rencana</div>
-    <div style="display:grid">${prows.map(([p,v])=>catRow(planIcon(p,true), p.name, v, "")).join("") || `<div class="empty">Tidak ada.</div>`}</div>
+    <div style="display:grid">${prows.map(([p,v])=>catRow(planIcon(p,true), p.name, v, planStats(p).budget)).join("") || `<div class="empty">Tidak ada.</div>`}</div>
     <div class="daysec">Semua catatan</div>
     <div class="seg" role="group" aria-label="Saring catatan">
       <button type="button" data-rf="all" aria-pressed="${reportFilter==="all"}">Semua</button>
